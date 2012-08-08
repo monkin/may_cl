@@ -2,8 +2,8 @@
 #ifndef MAY_MCL_H
 #define MAY_MCL_H
 
-#include "../lib/err.h"
-#include "../lib/str.h"
+#include <may/core/err.h>
+#include <may/core/str.h>
 #include <stdbool.h>
 
 /* mclt = mCL type */

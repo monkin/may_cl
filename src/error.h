@@ -1,7 +1,7 @@
 #ifndef MAY_MCL_ERROR_H
 #define MAY_MCL_ERROR_H
 
-#include "../lib/err.h"
+#include <may/core/err.h>
 #include <CL/cl.h>
 
 #define MCL_OPENCL_ERROR(lname, uname) ERR_DECLARE(e_opencl_ ## lname)

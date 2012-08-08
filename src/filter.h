@@ -5,9 +5,9 @@
 #include "filter_context.h"
 #include "ex.h"
 #include "mcl.h"
-#include "../lib/json.h"
-#include "../lib/map.h"
-#include "../lib/floader.h"
+#include <may/core/json.h>
+#include <may/core/map.h>
+#include <may/core/floader.h>
 #include "iloader.h"
 #include <stdbool.h>
 #include <CL/cl.h>

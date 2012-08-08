@@ -1,7 +1,7 @@
 
 #include "mcl.h"
-#include "../lib/parser.h"
-#include "../lib/syntree.h"
+#include <may/core/parser.h>
+#include <may/core/syntree.h>
 #include <CL/cl.h>
 
 ERR_DEFINE(e_mcl_error, "mCL error", 0);

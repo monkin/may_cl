@@ -2,8 +2,8 @@
 #ifndef MAY_MCL_IMAGE_H
 #define MAY_MCL_IMAGE_H
 
-#include "../lib/str.h"
-#include "../lib/err.h"
+#include <may/core/str.h>
+#include <may/core/err.h>
 #include <CL/cl.h>
 
 ERR_DECLARE(e_mcl_image_loading);

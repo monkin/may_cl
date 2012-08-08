@@ -4,3 +4,4 @@ CMakeFiles
 Makefile
 docs
 *.so
+*.a

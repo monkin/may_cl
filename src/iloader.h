@@ -2,8 +2,8 @@
 #ifndef MAY_MCL_ILOADER_H
 #define MAY_MCL_ILOADER_H
 
-#include "../lib/floader.h"
-#include "../lib/map.h"
+#include <may/core/floader.h>
+#include <may/core/map.h>
 #include "image.h"
 
 struct iloader_ss;

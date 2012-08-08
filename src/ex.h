@@ -3,9 +3,9 @@
 #define MAY_MCLEX_H
 
 #include "mcl.h"
-#include "../lib/map.h"
-#include "../lib/str.h"
-#include "../lib/stream.h"
+#include <may/core/map.h>
+#include <may/core/str.h>
+#include <may/core/stream.h>
 #include <CL/cl.h>
 
 ERR_DECLARE(e_mcl_ex_invalid_operand);

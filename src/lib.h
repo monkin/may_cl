@@ -1,8 +1,8 @@
 
-#ifndef MAY_MAYLIB_H
-#define MAY_MAYLIB_H
+#ifndef MAY_CL_H
+#define MAY_CL_H
 
-void maylib_init();
+void may_cl_init();
 
-#endif /* MAY_MAYLIB_H */
+#endif /* MAY_CL_H */
 

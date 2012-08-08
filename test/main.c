@@ -1,30 +1,23 @@
 
-#include <may/maylib.h>
-#include <may/lib/json.h>
-#include <may/lib/stream.h>
-#include <may/lib/test.h>
+#include <may/core/lib.h>
+#include <may/core/json.h>
+#include <may/core/stream.h>
+#include <may/core/test.h>
 
+#include "../src/mcl.h"
+#include "../src/ex.h"
+#include "../src/program.h"
+#include "../src/error.h"
+#include "../src/image.h"
 
-
-#include "units/heap.h"
-#include "units/str.h"
-#include "units/map.h"
-#include "units/parser.h"
-#include "units/stream.h"
-#include "units/json.h"
-#include "units/tar.h"
-#include "units/mcl/types.h"
-#include "units/mcl/program.h"
-#include "units/mcl/image.h"
+#include "units/types.h"
+#include "units/program.h"
+#include "units/image.h"
 
 
 int main() {
-	maylib_init();
-	test_str();
-	test_map();
-	test_parser();
-	test_json();
-	test_tar();
+	may_core_init();
+	may_cl_init();
 	test_mcl_types();
 	test_mcl_program();
 	test_mcl_image();

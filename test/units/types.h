@@ -1,6 +1,4 @@
 
-#include <may/cl/mcl.h>
-
 void test_mcl_types() {
 	TEST_MODULE("mcl_types");
 	heap_t h = heap_create(0);

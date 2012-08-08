@@ -1,18 +1,16 @@
 
-#include "maylib.h"
-#include "lib/json.h"
-#include "cl/mcl.h"
-#include "cl/ex.h"
-#include "cl/image.h"
-#include "cl/filter.h"
+#include "lib.h"
+#include <may/core/lib.h>
+#include "mcl.h"
+#include "ex.h"
+#include "image.h"
+#include "filter.h"
 #include <stdbool.h>
 
 static bool initialized = false;
 
-void maylib_init() {
+void may_cl_init() {
 	if(!initialized) {
-		mem_init();
-		json_init();
 		mclt_init();
 		mcl_init();
 		mcl_image_init();

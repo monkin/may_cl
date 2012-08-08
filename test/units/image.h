@@ -1,6 +1,4 @@
 
-#include <may/cl/image.h>
-
 void test_mcl_image() {
 	TEST_MODULE("mcl_image");
 	static char image_data[] = "GIF87a\020\000\020\000\241\003\000\000\000\000\310" \

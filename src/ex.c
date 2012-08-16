@@ -2,121 +2,87 @@
 #include "ex.h"
 #include <assert.h>
 
-ERR_DEFINE(e_mcl_ex_invalid_operand, "Invalid operand type", e_mcl_error);
-ERR_DEFINE(e_mcl_ex_invalid_function, "Invalid function name", e_mcl_error);
-ERR_DEFINE(e_mcl_ex_invalid_type, "Invalid constant type", e_mcl_error);
+static __thread mclex_program_t program;
 
+static str_t mclex_var_name() {
+	return str_cat(program->heap, str_from_cs(program->heap, "val"), str_from_int(program->heap, program->counter));
+}
 
-bool mcl_insert_ptr(map_t m, void *p) {
-	char phash[sizeof(void *)];
-	int i;
-	for(i=0; i<sizeof(void *); i++)
-		phash[i] = ((char *)(&p))[sizeof(void *) - i];
-	if(map_get_bin(m, phash, sizeof(phash)))
-		return false;
-	else {
-		map_set_bin(m, phash, sizeof(phash), p);
-		return true;
+/* Program */
+
+void mclex_program_begin() {
+	assert(!program);
+	heap_t h = heap_create(0);
+	err_try {
+		program = heap_alloc(h, sizeof(mclex_program_s));
+		program->heap = h;
+		program->block = 0;
+		program->global_source = sb_create(h);
+		program->local_source = sb_create(h);
+		program->arguments_source = sb_create(h);
+		program->arguments = map_create(h);
+		program->source = 0;
+		program->counter = 0;
+	} err_catch {
+		h = heap_delete(h);
+		err_throw_down();
 	}
 }
 
-static char hex_digit(int d) {
-	return d<10 ? '0' + d : 'a' + d - 10;
+void mclex_program_reset() {
+	assert(program);
+	heap_delete(program->heap);
+	program = 0;
 }
 
-static str_t pointer_to_name(heap_t h, char prefix, void *p) {
-	int i;
-	str_it_t si;
-	size_t var_id;
-	str_t r;
-	var_id = *((size_t *)&p);
-	r = str_create(h, sizeof(var_id)*2 + 1);
-	si = str_begin(r);
-	*(si++) = prefix;
-	for(i=0; i<sizeof(var_id)*2; i++, si++, var_id=var_id>>4)
-		*si = hex_digit(var_id & 0x0F);
+mclex_program_t mclex_program_end() {
+	assert(program);
+	assert(!program->block);
+	mclex_program_t r = program;
+	program = 0;
 	return r;
 }
 
-#define mcl_rule(cnd, result) if(cnd) return (result)
-#define mcl_rulex(precnd, cnd, result, exception) if(precnd) { if(cnd) { return (result); } else { err_throw(exception); }; }
-#define mcl_else(result) return result
-
-/**
- * t2 can be lossless converted to t1
- */
-static bool type_greater(mclt_t t1, mclt_t t2) {
-	mcl_rule(t1==t2, true);
-	mcl_rule(mclt_is_vector(t1) && mclt_is_vector(t2), mclt_vector_size(t1)==mclt_vector_size(t2) && type_greater(mclt_vector_of(t1), mclt_vector_of(t2)));
-	mcl_rule(mclt_is_float(t1), mclt_is_numeric(t2));
-	mcl_rule(mclt_is_integer(t1), mclt_integer_size(t1)>=mclt_integer_size(t2));
-	mcl_rule(mclt_is_vector(t1), type_greater(mclt_vector_of(t1), t2));
-	mcl_rule(mclt_is_pointer(t1) && mclt_is_pointer(t2), (mclt_pointer_to(t1)==mclt_pointer_to(t2) || mclt_is_void(mclt_pointer_to(t1))) && mclt_pointer_type(t1)==mclt_pointer_type(t1));
-	mcl_else(false);
+mclex_program_t mclex_program_delete(mclex_program_t p) {
+	if(p)
+		heap_delete(p->heap);
+	return 0;
 }
 
-/**
- * t1 can contains some values from t2
- * t2 can be converted to t1
- */
-static bool type_compatible(mclt_t t1, mclt_t t2) {
-	mcl_rule(t1==t2, true);
-	mcl_rule(mclt_is_vector(t1) && mclt_is_vector(t2), mclt_vector_size(t1)==mclt_vector_size(t2));
-	mcl_rule(mclt_is_pointer(t1) && mclt_is_pointer(t2), mclt_pointer_type(t1)==mclt_pointer_type(t1));
-	mcl_rule(mclt_is_numeric(t1) && mclt_is_numeric(t2), true);
-	mcl_else(false);
+/* Block */
+
+void mclex_begin() {
+	mclex_block_t block = heap_alloc(program->heap, sizeof(mclex_block_s));
+	block->source = sb_create(program->heap);
+	sb_append_cs(block->source, "{\n")
+	block->var_type = MCLT_VOID;
+	block->var_name = 0;
+	block->parent = program->block;
+	program->block = block;
 }
 
-/**
- * For numerics and vectors only. Returns the greater of both types.
- */
-static mclt_t type_max(mclt_t t1, mclt_t t2) {
-	mcl_rule(t1==t2, true);
-	mcl_rulex(mclt_is_vector(t1) && mclt_is_vector(t2),
-		mclt_vector_size(t1)==mclt_vector_size(t2),
-		mclt_vector(type_max(mclt_vector_of(t1), mclt_vector_of(t2)), mclt_vector_size(t1)),
-		e_mcl_ex_invalid_operand);
-	mcl_rule(mclt_is_vector(t1) && mclt_is_numeric(t2),
-		mclt_vector(type_max(mclt_vector_of(t1), t2), mclt_vector_size(t1)));
-	mcl_rule(mclt_is_numeric(t1) && mclt_is_vector(t2), type_max(t2, t1));
-	mcl_rule(mclt_is_float(t1) || mclt_is_float(t2), MCLT_FLOAT);
-	mcl_rule((mclt_is_integer(t1) && mclt_is_integer(t2)) ? mclt_integer_size(t1)==mclt_integer_size(t2) : false, t1 | MCLT_UNSIGNED);
-	mcl_rule(mclt_is_integer(t1) && mclt_is_integer(t2), mclt_integer_size(t1)>mclt_integer_size(t2) ? t1 : t2);
-	err_throw(e_mcl_ex_invalid_operand);
+mclex_block_t mclex_current_block() {
+	return program->block;
 }
 
-static void mcl_push_arguments(mcl_ex_t ex, void (*push_fn)(void *, mcl_arg_t), void *push_fn_arg) {
-	ex->vtable->push_arguments(ex->data, push_fn, push_fn_arg);
-}
-static void mcl_global_source(mcl_ex_t ex, map_t m, ios_t s) {
-	ex->vtable->global_source(ex->data, m, s);
-}
-static void mcl_local_source(mcl_ex_t ex, map_t m, ios_t s) {
-	ex->vtable->local_source(ex->data, m, s);
-}
-static void mcl_value_source(mcl_ex_t ex, ios_t s) {
-	ex->vtable->value_source(ex->data, s);
-}
-
-#define MAY_MCLEX_C_INCLUDE
-
-#include "ex/call.c"
-#include "ex/cast.c"
-#include "ex/var.c"
-#include "ex/arg.c"
-#include "ex/const.c"
-#include "ex/if.c"
-#include "ex/for.c"
-#include "ex/while.c"
-#include "ex/seq.c"
-#include "ex/random.c"
-#include "ex/vector.c"
-#include "ex/init.c"
-
-#undef MAY_MCLEX_C_INCLUDE
-
-bool mcl_is_lvalue(mcl_ex_t ex) {
-	return ex->vtable==&var_vtable;
+mclex_t mclex_ret(mclex_block_t b, mclex_t ex) {
+	if(!b)
+		b = program->block;
+	if(!b->var_name) {
+		b->var_name = mclex_var_name();
+		b->var_type = ex->type;
+		sb_append(b->source, b->var_name);
+		sb_append_cs(b->source, " = ");
+		sb_append_sb(b->source, ex->expression);
+		sb_append_cs(b->source, ";\n");
+	} else {
+		//!!! TODO: write code
+	}
 }
 
+mclex_t mclex_end(mclex_t ex) {
+	if(ex)
+		mclex_ret(0, ex);
+	//!!! TODO: write code
+}
 

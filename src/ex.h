@@ -1,109 +1,76 @@
 
-#ifndef MAY_MCLEX_H
-#define MAY_MCLEX_H
+#ifndef MAY_CL_EX_H
+#define MAY_CL_EX_H
 
 #include "mcl.h"
-#include <may/core/map.h>
-#include <may/core/str.h>
-#include <may/core/stream.h>
-#include <CL/cl.h>
+#include <may/core/lib.h>
+#include <stdbool.h>
 
-ERR_DECLARE(e_mcl_ex_invalid_operand);
-ERR_DECLARE(e_mcl_ex_invalid_function);
-ERR_DECLARE(e_mcl_ex_invalid_type);
+ERR_DECLARE(e_mclex_casting_error);
 
-struct mcl_ex_ss;
-typedef struct mcl_ex_ss mcl_ex_s;
-typedef mcl_ex_s *mcl_ex_t;
+typedef struct mclex_block_ss {
+	sb_t source;
+	mclt_t var_type;
+	sb_t var_name;
+	struct mclex_block_ss *parent;
+} mclex_block_s;
 
-enum {
-	MCL_EXC_CALL,
-	MCL_EXC_VAR,
-	MCL_EXC_ARG,
-	MCL_EXC_CONST
-};
+typedef mclex_block_s *mclex_block_t;
+
+typedef struct mclex_program_ss {
+	heap_t heap;
+	mclex_block_t block;
+	sb_t global_source;
+	sb_t local_source;
+	sb_t arguments_source;
+	map_t arguments;
+	str_t source;
+	unsigned long counter; // Used to generate variables names.
+} mclex_program_s;
+
+typedef mclex_program_s *mclex_program_t;
+
+void mclex_program_begin();
+void mclex_program_reset(); // Remove all current program data and stop building.
+mclex_program_t mclex_program_end();
+mclex_program_t mclex_program_delete(mclex_program_t);
 
 typedef struct {
-	str_t name;
 	mclt_t type;
-	cl_uint position;
-} mcl_arg_s;
+	sb_t expression;
+} mclex_s;
 
-typedef mcl_arg_s *mcl_arg_t;
+typedef mclex_s *mclex_t;
 
+void mclex_begin(); // block
+mclex_block_t mclex_current_block();
+/**
+ * If block is null, current block used.
+ */
+mclex_t mclex_ret(mclex_block_t, mclex_t); // set block result
+mclex_t mclex_end(mclex_t); // ~block
 
-bool mcl_insert_ptr(map_t, void *);
+void mclex_if(mclex_t); // block
+void mclex_elsif(mclex_t);
+void mclex_unless(mclex_t); // block
+void mclex_else();
 
-typedef struct {
-	void (*push_arguments)(void *, void (*push_fn)(void *, mcl_arg_t), void *dt);
-	void (*global_source)(void *, map_t, ios_t);
-	void (*local_source)(void *, map_t, ios_t);
-	void (*value_source)(void *, ios_t);
-} mcl_ex_vtable_s;
+void mclex_while(mclex_t); // block
+/**
+ * Gets two integer expressions and return iterator value.
+ */
+mclex_t mclex_for(mclex_t, mclex_t); // block
 
-typedef mcl_ex_vtable_s *mcl_ex_vtable_t;
+mclex_t mclex_cast(mclt_t, mclex_t);
 
-struct mcl_ex_ss {
-	mclt_t return_type;
-	mcl_ex_vtable_t vtable;
-	void *data;
-};
+mclex_t mclex_var(mclex_t);
+mclex_t mclex_const(mclex_t);
 
-void mcl_init();
+mclex_t mclex_global_var(str_t name, mclex_t);
+mclex_t mclex_global_const(str_t name, mclex_t);
 
-bool mcl_is_lvalue(mcl_ex_t);
-
-mcl_ex_t mcl_call(heap_t h, str_t nm);
-mcl_ex_t mcl_call_cs(heap_t h, const char *nm);
-mcl_ex_t mcl_call_1(heap_t h, str_t nm, mcl_ex_t);
-mcl_ex_t mcl_call_1_cs(heap_t h, const char *nm, mcl_ex_t);
-mcl_ex_t mcl_call_2(heap_t h, str_t nm, mcl_ex_t, mcl_ex_t);
-mcl_ex_t mcl_call_2_cs(heap_t h, const char *nm, mcl_ex_t, mcl_ex_t);
-mcl_ex_t mcl_call_3(heap_t h, str_t nm, mcl_ex_t, mcl_ex_t, mcl_ex_t);
-mcl_ex_t mcl_call_3_cs(heap_t h, const char *nm, mcl_ex_t, mcl_ex_t, mcl_ex_t);
-
-mcl_ex_t mcl_var(heap_t h, mcl_ex_t);
-mcl_ex_t mcl_arg(heap_t h, mclt_t tp, mcl_arg_s *);
-mcl_ex_t mcl_seq(heap_t h, size_t n, ...);
-mcl_ex_t mcl_init_ex(heap_t, mcl_ex_t init_ex, mcl_ex_t value_ex);
-mcl_ex_t mcl_if(heap_t h, mcl_ex_t, mcl_ex_t, mcl_ex_t);
-mcl_ex_t mcl_for(heap_t h, mcl_ex_t var_init, mcl_ex_t var_cond, mcl_ex_t var_inc, mcl_ex_t ex);
-mcl_ex_t mcl_while(heap_t h, mcl_ex_t condition, mcl_ex_t expression);
-mcl_ex_t mcl_cast(heap_t h, mclt_t, mcl_ex_t);
-
-mcl_ex_t mcl_const(heap_t h, mclt_t tp, const void *val);
-mcl_ex_t mcl_const_maxfloat();
-mcl_ex_t mcl_const_hugeval();
-mcl_ex_t mcl_const_infinity();
-mcl_ex_t mcl_const_nan();
-mcl_ex_t mcl_const_e();
-mcl_ex_t mcl_const_log2e();
-mcl_ex_t mcl_const_log10e();
-mcl_ex_t mcl_const_ln2();
-mcl_ex_t mcl_const_ln10();
-mcl_ex_t mcl_const_pi();
-mcl_ex_t mcl_const_pi_2();
-mcl_ex_t mcl_const_pi_4();
-mcl_ex_t mcl_const_1_pi();
-mcl_ex_t mcl_const_2_pi();
-mcl_ex_t mcl_const_2pi();
-mcl_ex_t mcl_const_2_sqrtpi();
-mcl_ex_t mcl_const_sqrt2();
-mcl_ex_t mcl_const_1_sqrt2();
-
-mcl_ex_t mcl_vector_select(heap_t h, mcl_ex_t ex, unsigned int rsz, const unsigned int *indexes);
-mcl_ex_t mcl_vector_select_1(heap_t h, mcl_ex_t ex, unsigned int i);
-mcl_ex_t mcl_vector_select_2(heap_t h, mcl_ex_t ex, unsigned int i0, unsigned int i1);
-mcl_ex_t mcl_vector_select_4(heap_t h, mcl_ex_t ex, unsigned int i0, unsigned int i1, unsigned int i2, unsigned int i3);
-mcl_ex_t mcl_vector_select_8(heap_t h, mcl_ex_t ex, unsigned int i0, unsigned int i1, unsigned int i2, unsigned int i3, unsigned int i4, unsigned int i5, unsigned int i6, unsigned int i7);
-mcl_ex_t mcl_vector_lo(heap_t h, mcl_ex_t ex);
-mcl_ex_t mcl_vector_hi(heap_t h, mcl_ex_t ex);
-mcl_ex_t mcl_vector_odd(heap_t h, mcl_ex_t ex);
-mcl_ex_t mcl_vector_even(heap_t h, mcl_ex_t ex);
-
-mcl_ex_t mcl_random(heap_t h, size_t vector_size);
+mclex_t mclex_literal(mclt_t tp, const void *val);
+mclex_t mclex_array(mclt_t tp, size_t sz, const void *val);
 
 
-
-#endif /* MAY_MCLEX_H */
-
+#endif /* MAY_CL_EX_H */

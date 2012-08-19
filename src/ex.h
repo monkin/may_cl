@@ -37,12 +37,13 @@ mclex_program_t mclex_program_delete(mclex_program_t);
 
 typedef struct {
 	mclt_t type;
-	sb_t expression;
-	bool is_lvalue;
-	long mem_type;
+	sb_t source;
+	long mem_type; /* Only for lvalues, in other cases should be 0 */
 } mclex_s;
 
 typedef mclex_s *mclex_t;
+
+mclex_t mclex_ex(mclt_t);
 
 void mclex_begin(); // block
 mclex_block_t mclex_current_block();

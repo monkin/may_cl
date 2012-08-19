@@ -83,6 +83,7 @@ mclt_t mclt_vector_of(mclt_t t1);
 mclt_t mclt_vector_size(mclt_t t1);
 mclt_t mclt_pointer_to(mclt_t t1);
 mclt_t mclt_promote(mclt_t t1, mclt_t t2);
+mclt_t mclt_promote_std(mclt_t t1, mclt_t t2);
 bool mclt_convertable_to(mclt_t t1, mclt_t t2);
 str_t mclt_name(mclt_t);
 mclt_t mclt_parse(str_t);

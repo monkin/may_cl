@@ -8,6 +8,14 @@ static str_t mclex_var_name() {
 	return str_cat(program->heap, str_from_cs(program->heap, "val"), str_from_int(program->heap, program->counter));
 }
 
+mclex_t mclex_ex(mclt_t t, long mem_type) {
+	mclex_t ex = heap_alloc(program->heap, sizeof(mclex_s));
+	ex->type = t;
+	ex->source = sb_create(program->heap);
+	ex->mem_type = mem_type;
+	return ex;
+}
+
 /* Program */
 
 void mclex_program_begin() {
@@ -73,14 +81,14 @@ void mclex_ret(mclex_block_t b, mclex_t ex) {
 		b->var_type = ex->type;
 		sb_append(b->source, b->var_name);
 		sb_append_cs(b->source, " = ");
-		sb_append_sb(b->source, ex->expression);
+		sb_append_sb(b->source, ex->source);
 		sb_append_cs(b->source, ";\n");
 	} else {
 		if(b->var_type != ex->type)
-			b->var_type = mclt_promote(b->var_type, ex->type);
+			b->var_type = mclt_promote_std(b->var_type, ex->type);
 		sb_append(b->source, b->var_name);
 		sb_append_cs(b->source, " = ");
-		sb_append_sb(ex->expression);
+		sb_append_sb(ex->source);
 		sb_append_cs(b->source, ";\n");
 	}
 }
@@ -98,12 +106,8 @@ mclex_t mclex_end(mclex_t ex) {
 	sb_append_cs(var_sb, ";\n");
 	sb_preppend_sb(b->source, var_sb);
 
-	mclex_t r = heap_alloc(program->heap, sizeof(mclex_s));
-	r->type = b->var_type;
-	r->expression = sb_create(program->heap);
-	r->is_lvalue = false;
-	r->mem_type = 0;
-	sb_append(r->expression, b->var_name);
+	mclex_t r = mclex_ex(b->var_type, 0);
+	sb_append(r->source, b->var_name);
 
 	if(b->parent)
 		sb_append_sb(b->parent->source, b->source);
@@ -113,4 +117,23 @@ mclex_t mclex_end(mclex_t ex) {
 
 	return r;
 }
+
+mclex_t mclex_cast(mclt_t t, mclex_t ex) {
+	mclex_t r = mclex_ex(t, 0);
+	if(mclt_is_vector(t) || mclt_is_scalar(t)) {
+		sb_append_cs(r->source, "convert_");
+		sb_append(r->source, mclt_name(cd->cast_to));
+		sb_append_cs(r->source, "(");
+		sb_append_sb(r->source, s);
+		sb_append_cs(r->source, ")");
+	} else {
+		sb_append_cs(r->source, "((");
+		sb_append(r->source, mclt_name(cd->cast_to));
+		sb_append_cs(r->source, ") (");
+		sb_append_sb(r->source, ex->source);
+		sb_append_cs(r->source, "))");
+	}
+	return r;
+}
+
 

@@ -53,15 +53,23 @@ size_t mclt_sizeof(mclt_t t) {
 	}
 }
 
+mclt_t mclt_promote_std(mclt_t t1, mclt_t t2) {
+	if(!mclt_is_numeric(t1) || !mclt_is_numeric(t2))
+		err_throw(e_mclt_error);
+	if(t1==t2)
+		return t1;
+	if(mclt_is_float(t1) || mclt_is_float(t2))
+		return MCLT_FLOAT;
+	if(mclt_integer_size(t1)!=mclt_integer_size(t2))
+		return mclt_integer_size(t1)>mclt_integer_size(t2) ? t1 : t2;
+	return mclt_is_unsigned(t1) ? t1 : t2;
+}
+
 /**
  * Usual ariphmetic conversion.
  * Convertions between vectors allowed.
  */
 mclt_t mclt_promote(mclt_t t1, mclt_t t2) {
-	if(!(mclt_is_numeric(t1) || mclt_is_vector(t1)) || !(mclt_is_numeric(t2) || mclt_is_vector(t2)))
-		err_throw(e_mclt_error);
-	if(t1==t2)
-		return t1;
 	if(mclt_is_vector(t1)) {
 		if(mclt_is_vector(t2)) {
 			if(mclt_vector_size(t1)==mclt_vector_size(t2))
@@ -73,11 +81,7 @@ mclt_t mclt_promote(mclt_t t1, mclt_t t2) {
 	}
 	if(mclt_is_vector(t2))
 		return mclt_promote(t2, t1);
-	if(mclt_is_float(t1) || mclt_is_float(t2))
-		return MCLT_FLOAT;
-	if(mclt_integer_size(t1)!=mclt_integer_size(t2))
-		return mclt_integer_size(t1)>mclt_integer_size(t2) ? t1 : t2;
-	return mclt_is_unsigned(t1) ? t1 : t2;
+	return mclt_promote_std(t1, t2);
 }
 
 /**

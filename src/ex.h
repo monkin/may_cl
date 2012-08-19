@@ -38,6 +38,8 @@ mclex_program_t mclex_program_delete(mclex_program_t);
 typedef struct {
 	mclt_t type;
 	sb_t expression;
+	bool is_lvalue;
+	long mem_type;
 } mclex_s;
 
 typedef mclex_s *mclex_t;
@@ -47,7 +49,7 @@ mclex_block_t mclex_current_block();
 /**
  * If block is null, current block used.
  */
-mclex_t mclex_ret(mclex_block_t, mclex_t); // set block result
+void mclex_ret(mclex_block_t, mclex_t); // set block result
 mclex_t mclex_end(mclex_t); // ~block
 
 void mclex_if(mclex_t); // block
@@ -74,3 +76,4 @@ mclex_t mclex_array(mclt_t tp, size_t sz, const void *val);
 
 
 #endif /* MAY_CL_EX_H */
+

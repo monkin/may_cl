@@ -10,7 +10,7 @@ ERR_DEFINE(e_mclt_parsing_error, "Invalid type name", e_mclt_error);
 ERR_DEFINE(e_mclt_size_undefined, "Can't determine type size", e_mclt_error);
 
 mclt_t mclt_vector(mclt_t t, int vector_size) {
-	if(!mclt_is_numeric(t) || !(vector_size==2 || vector_size==4 || vector_size==8 || vector_size==16))
+	if(!mclt_is_numeric(t) || !(vector_size==2 || vector_size==3 || vector_size==4 || vector_size==8 || vector_size==16))
 		err_throw(e_mclt_error);
 	return t | (vector_size<<8);
 }
@@ -37,6 +37,60 @@ mclt_t mclt_pointer_to(mclt_t t) {
 	if(!mclt_is_pointer(t))
 		err_throw(e_mclt_error);
 	return t & 0x3F;
+}
+
+size_t mclt_sizeof(mclt_t t) {
+	if(mclt_is_pointer(t) || mclt_is_image(t))
+		return sizeof(cl_mem);
+	else if(mclt_is_float(t))
+		return 4;
+	else if(mclt_is_integer(t))
+		return mclt_integer_size(t);
+	else if(mclt_is_vector(t)) {
+		mclt_t vt = mclt_vector_of(t);
+		int vs = mclt_vector_size(t);
+		return (vt==MCLT_CHAR && vs==3) ? 4 : mclt_sizeof(vt) * vs;
+	}
+}
+
+/**
+ * Usual ariphmetic conversion.
+ * Convertions between vectors allowed.
+ */
+mclt_t mclt_promote(mclt_t t1, mclt_t t2) {
+	if(!(mclt_is_numeric(t1) || mclt_is_vector(t1)) || !(mclt_is_numeric(t2) || mclt_is_vector(t2)))
+		err_throw(e_mclt_error);
+	if(t1==t2)
+		return t1;
+	if(mclt_is_vector(t1)) {
+		if(mclt_is_vector(t2)) {
+			if(mclt_vector_size(t1)==mclt_vector_size(t2))
+				return mclt_vector(mclt_promote(mclt_vector_of(t1), mclt_vector_of(t2)), mclt_vector_size(t1));
+			else
+				err_throw(e_mclt_error);
+		} else
+			return mclt_vector(mclt_promote(mclt_vector_of(t1), t2), mclt_vector_size(t1));
+	}
+	if(mclt_is_vector(t2))
+		return mclt_promote(t2, t1);
+	if(mclt_is_float(t1) || mclt_is_float(t2))
+		return MCLT_FLOAT;
+	if(mclt_integer_size(t1)!=mclt_integer_size(t2))
+		return mclt_integer_size(t1)>mclt_integer_size(t2) ? t1 : t2;
+	return mclt_is_unsigned(t1) ? t1 : t2;
+}
+
+/**
+ * t1 can be explicitly converted to t2
+ */
+bool mclt_convertable_to(mclt_t t1, mclt_t t2) {
+	if(t1==t2)
+		return true;
+	if(mclt_is_vector(t1) && mclt_is_vector(t2))
+		return mclt_vector_size(t1) == mclt_vector_size(t2);
+	if(mclt_is_pointer(t1) && mclt_is_pointer(t2))
+		return mclt_pointer_type(t1) == mclt_pointer_type(t1);
+	return mclt_is_numeric(t1) && mclt_is_numeric(t2);
 }
 
 static map_t type_names = 0;

@@ -65,7 +65,7 @@ mclex_block_t mclex_current_block() {
 	return program->block;
 }
 
-mclex_t mclex_ret(mclex_block_t b, mclex_t ex) {
+void mclex_ret(mclex_block_t b, mclex_t ex) {
 	if(!b)
 		b = program->block;
 	if(!b->var_name) {
@@ -76,13 +76,41 @@ mclex_t mclex_ret(mclex_block_t b, mclex_t ex) {
 		sb_append_sb(b->source, ex->expression);
 		sb_append_cs(b->source, ";\n");
 	} else {
-		//!!! TODO: write code
+		if(b->var_type != ex->type)
+			b->var_type = mclt_promote(b->var_type, ex->type);
+		sb_append(b->source, b->var_name);
+		sb_append_cs(b->source, " = ");
+		sb_append_sb(ex->expression);
+		sb_append_cs(b->source, ";\n");
 	}
 }
 
 mclex_t mclex_end(mclex_t ex) {
 	if(ex)
 		mclex_ret(0, ex);
-	//!!! TODO: write code
+
+	mclex_block_t b = program->block;
+	sb_append_cs(b->source, "};\n");
+
+	sb_t var_sb = sb_create(program->heap);
+	sb_append(var_sb, mclt_name(b->var_type));
+	sb_append(var_sb, b->var_name);
+	sb_append_cs(var_sb, ";\n");
+	sb_preppend_sb(b->source, var_sb);
+
+	mclex_t r = heap_alloc(program->heap, sizeof(mclex_s));
+	r->type = b->var_type;
+	r->expression = sb_create(program->heap);
+	r->is_lvalue = false;
+	r->mem_type = 0;
+	sb_append(r->expression, b->var_name);
+
+	if(b->parent)
+		sb_append_sb(b->parent->source, b->source);
+	else
+		sb_append_sb(program->local_source, b->source);
+	program->block = b->parent;
+
+	return r;
 }
 

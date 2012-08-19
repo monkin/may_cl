@@ -24,11 +24,12 @@ enum {
 	MCLT_P_GLOBAL = 0x010000, /* Pointer to global memory */
 	MCLT_P_LOCAL = 0x020000,  /* Pointer to local memory */
 	MCLT_P_PRIVATE = 0x040000, /* Pointer to private memory */
-	MCLT_IMAGE_R = 0x080000,
-	MCLT_IMAGE_W = 0x100000
+	MCLT_P_CONSTANT = 0x080000, /* Pointer to contant memory */
+	MCLT_IMAGE_R = 0x100000,
+	MCLT_IMAGE_W = 0x200000
 };
 
-#define MCLT_VECTOR_SHORTCUT(tp) tp ## _2 = tp | 0x0200, tp ## _4 = tp | 0x0400, tp ## _8 = tp | 0x0800, tp ## _16 = tp | 0x1000
+#define MCLT_VECTOR_SHORTCUT(tp) tp ## _2 = tp | 0x0200, tp ## _3 = tp | 0x0300, tp ## _4 = tp | 0x0400, tp ## _8 = tp | 0x0800, tp ## _16 = tp | 0x1000
 
 enum mclt_type_shortcuts {
 	MCLT_CHAR = MCLT_INTEGER | 1,
@@ -55,7 +56,8 @@ enum mclt_type_shortcuts {
 enum {
 	MCL_MEM_GLOBAL = MCLT_P_GLOBAL,
 	MCL_MEM_LOCAL = MCLT_P_LOCAL,
-	MCL_MEM_PRIVATE = MCLT_P_PRIVATE
+	MCL_MEM_PRIVATE = MCLT_P_PRIVATE,
+	MCL_MEM_CONSTANT = MCLT_P_CONSTANT
 };
 
 typedef long mclt_t;
@@ -72,13 +74,16 @@ typedef long mclt_t;
 #define mclt_is_scalar(t) mclt_is_numeric(t)
 #define mclt_is_unsigned(t) ((t)&MCLT_UNSIGNED)
 #define mclt_is_signed(t) (!((t)&MCLT_UNSIGNED))
-#define mclt_integer_size(t) ((MCLT_I_SIZE & (t))>0 ? (1<<((MCLT_I_SIZE & (t))-1)) : 0)
+#define mclt_integer_size(t) (1<<((MCLT_I_SIZE & (t))-1))
 #define mclt_pointer_type(t) ((t) & (MCL_MEM_GLOBAL | MCL_MEM_LOCAL | MCL_MEM_PRIVATE))
+size_t mclt_sizeof(mclt_t);
 mclt_t mclt_vector(mclt_t t1, int vector_size);
 mclt_t mclt_pointer(mclt_t t, long mem_type);
 mclt_t mclt_vector_of(mclt_t t1);
 mclt_t mclt_vector_size(mclt_t t1);
 mclt_t mclt_pointer_to(mclt_t t1);
+mclt_t mclt_promote(mclt_t t1, mclt_t t2);
+bool mclt_convertable_to(mclt_t t1, mclt_t t2);
 str_t mclt_name(mclt_t);
 mclt_t mclt_parse(str_t);
 mclt_t mclt_parse_cs(const char *);

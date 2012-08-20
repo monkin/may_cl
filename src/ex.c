@@ -119,21 +119,30 @@ mclex_t mclex_end(mclex_t ex) {
 }
 
 mclex_t mclex_cast(mclt_t t, mclex_t ex) {
-	mclex_t r = mclex_ex(t, 0);
-	if(mclt_is_vector(t) || mclt_is_scalar(t)) {
-		sb_append_cs(r->source, "convert_");
-		sb_append(r->source, mclt_name(cd->cast_to));
-		sb_append_cs(r->source, "(");
-		sb_append_sb(r->source, s);
-		sb_append_cs(r->source, ")");
+	mclt_t ex_t = ex->type;
+	if(t==ex_t)
+		return ex;
+	if((mclt_is_vector(t) && ((mclt_is_vector(ex_t) ? mclt_vector_size(ex_t)==mclt_vector_size(t) : false) || mclt_is_numeric(ex_t)))
+	   		|| (mclt_is_numeric(t) && mclt_is_numeric(ex_t))
+	   		|| ((mclt_is_poiter(t) && mclt_is_pointer(t)) ? mclt_pointer_type(t)==mclt_pointer_type(ex_t) : false)) {
+		mclex_t r = mclex_ex(t, 0);
+		if(mclt_is_vector(t) || mclt_is_scalar(t)) {
+			sb_append_cs(r->source, "convert_");
+			sb_append(r->source, mclt_name(cd->cast_to));
+			sb_append_cs(r->source, "(");
+			sb_append_sb(r->source, s);
+			sb_append_cs(r->source, ")");
+		} else {
+			sb_append_cs(r->source, "((");
+			sb_append(r->source, mclt_name(cd->cast_to));
+			sb_append_cs(r->source, ") (");
+			sb_append_sb(r->source, ex->source);
+			sb_append_cs(r->source, "))");
+		}
+		return r;
 	} else {
-		sb_append_cs(r->source, "((");
-		sb_append(r->source, mclt_name(cd->cast_to));
-		sb_append_cs(r->source, ") (");
-		sb_append_sb(r->source, ex->source);
-		sb_append_cs(r->source, "))");
+		err_throw(e_mclex_casting_error);
 	}
-	return r;
 }
 
 

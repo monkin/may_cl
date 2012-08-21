@@ -110,9 +110,10 @@ static void insert_name(mclt_t t, const char *nm) {
 }
 static void insert_name_p(mclt_t t, const char *name) {
 	char buff[64];
-	memset(buff, 0, 64); sprintf(buff, "global %s *", name);  TYPE_APPEND(mclt_pointer(t, MCLT_P_GLOBAL), buff);
-	memset(buff, 0, 64); sprintf(buff, "local %s *", name);   TYPE_APPEND(mclt_pointer(t, MCLT_P_LOCAL), buff);
+	memset(buff, 0, 64); sprintf(buff, "global %s *", name); TYPE_APPEND(mclt_pointer(t, MCLT_P_GLOBAL), buff);
+	memset(buff, 0, 64); sprintf(buff, "local %s *", name); TYPE_APPEND(mclt_pointer(t, MCLT_P_LOCAL), buff);
 	memset(buff, 0, 64); sprintf(buff, "private %s *", name); TYPE_APPEND(mclt_pointer(t, MCLT_P_PRIVATE), buff);
+	memset(buff, 0, 64); sprintf(buff, "constant %s *", name); TYPE_APPEND(mclt_pointer(t, MCLT_P_CONSTANT), buff);
 }
 static void insert_name_v(mclt_t t, const char *name) {
 	int i;
@@ -186,7 +187,8 @@ void mclt_init() {
 			parser_t p_global = parser_named(h, MCLT_P_GLOBAL | MCLT_POINTER, parser_string(h, "global"));
 			parser_t p_local = parser_named(h, MCLT_P_LOCAL | MCLT_POINTER, parser_string(h, "local"));
 			parser_t p_private = parser_named(h, MCLT_P_PRIVATE | MCLT_POINTER, parser_string(h, "private"));
-			parser_t p_mem_type = parser_or(h, p_global, parser_or(h, p_local, p_private));
+			parser_t p_constant = parser_named(h, MCLT_P_CONSTANT | MCLT_POINTER, parser_string(h, "constant"));
+			parser_t p_mem_type = parser_or(h, p_constant, parser_or(h, p_global, parser_or(h, p_local, p_private)));
 			parser_t p_pointer = parser_and(h, p_mem_type,
 				parser_and(h, p_spaces,
 					parser_and(h, p_numeric,

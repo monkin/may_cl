@@ -30,6 +30,14 @@ typedef struct mclex_program_ss {
 
 typedef mclex_program_s *mclex_program_t;
 
+extern __thread mclex_program_t mclex_program;
+
+#define mclex_heap() (mclex_program->heap)
+#define mclex_local_source() (mclex_program->local_source)
+#define mclex_global_source() (mclex_program->global_source)
+#define mclex_block() (mclex_program->block)
+#define mclex_block_source() (mclex_block()->source)
+
 void mclex_program_begin();
 void mclex_program_reset(); // Remove all current program data and stop building.
 mclex_program_t mclex_program_end();
@@ -54,8 +62,8 @@ void mclex_ret(mclex_block_t, mclex_t); // set block result
 mclex_t mclex_end(mclex_t); // ~block
 
 void mclex_if(mclex_t); // block
-void mclex_elsif(mclex_t);
 void mclex_unless(mclex_t); // block
+void mclex_elsif(mclex_t);
 void mclex_else();
 
 void mclex_while(mclex_t); // block
@@ -66,6 +74,7 @@ mclex_t mclex_for(mclex_t, mclex_t); // block
 
 mclex_t mclex_cast(mclt_t, mclex_t);
 
+mclex_t mclex_null(mclt_t);
 mclex_t mclex_var(mclex_t);
 mclex_t mclex_const(mclex_t);
 

@@ -2,16 +2,16 @@
 #include "ex.h"
 #include <assert.h>
 
-static __thread mclex_program_t program;
+__thread mclex_program_t mclex_program;
 
 static str_t mclex_var_name() {
-	return str_cat(program->heap, str_from_cs(program->heap, "val"), str_from_int(program->heap, program->counter));
+	return str_cat(mclex_heap(), str_from_cs(mclex_heap(), "val"), str_from_int(mclex_heap(), mclex_program->counter));
 }
 
 mclex_t mclex_ex(mclt_t t, long mem_type) {
-	mclex_t ex = heap_alloc(program->heap, sizeof(mclex_s));
+	mclex_t ex = heap_alloc(mclex_heap(), sizeof(mclex_s));
 	ex->type = t;
-	ex->source = sb_create(program->heap);
+	ex->source = sb_create(mclex_heap());
 	ex->mem_type = mem_type;
 	return ex;
 }
@@ -19,18 +19,18 @@ mclex_t mclex_ex(mclt_t t, long mem_type) {
 /* Program */
 
 void mclex_program_begin() {
-	assert(!program);
+	assert(!mclex_program);
 	heap_t h = heap_create(0);
 	err_try {
-		program = heap_alloc(h, sizeof(mclex_program_s));
-		program->heap = h;
-		program->block = 0;
-		program->global_source = sb_create(h);
-		program->local_source = sb_create(h);
-		program->arguments_source = sb_create(h);
-		program->arguments = map_create(h);
-		program->source = 0;
-		program->counter = 0;
+		mclex_program = heap_alloc(h, sizeof(mclex_program_s));
+		mclex_program->heap = h;
+		mclex_program->block = 0;
+		mclex_program->global_source = sb_create(h);
+		mclex_program->local_source = sb_create(h);
+		mclex_program->arguments_source = sb_create(h);
+		mclex_program->arguments = map_create(h);
+		mclex_program->source = 0;
+		mclex_program->counter = 0;
 	} err_catch {
 		h = heap_delete(h);
 		err_throw_down();
@@ -38,16 +38,16 @@ void mclex_program_begin() {
 }
 
 void mclex_program_reset() {
-	assert(program);
-	heap_delete(program->heap);
-	program = 0;
+	assert(mclex_program);
+	heap_delete(mclex_heap());
+	mclex_program = 0;
 }
 
 mclex_program_t mclex_program_end() {
-	assert(program);
-	assert(!program->block);
-	mclex_program_t r = program;
-	program = 0;
+	assert(mclex_program);
+	assert(!mclex_program->block);
+	mclex_program_t r = mclex_program;
+	mclex_program = 0;
 	return r;
 }
 
@@ -60,22 +60,18 @@ mclex_program_t mclex_program_delete(mclex_program_t p) {
 /* Block */
 
 void mclex_begin() {
-	mclex_block_t block = heap_alloc(program->heap, sizeof(mclex_block_s));
-	block->source = sb_create(program->heap);
+	mclex_block_t block = heap_alloc(mclex_heap(), sizeof(mclex_block_s));
+	block->source = sb_create(mclex_heap());
 	sb_append_cs(block->source, "{\n")
 	block->var_type = MCLT_VOID;
 	block->var_name = 0;
-	block->parent = program->block;
+	block->parent = mclex_program->block;
 	program->block = block;
-}
-
-mclex_block_t mclex_current_block() {
-	return program->block;
 }
 
 void mclex_ret(mclex_block_t b, mclex_t ex) {
 	if(!b)
-		b = program->block;
+		b = mclex_block();
 	if(!b->var_name) {
 		b->var_name = mclex_var_name();
 		b->var_type = ex->type;
@@ -97,10 +93,10 @@ mclex_t mclex_end(mclex_t ex) {
 	if(ex)
 		mclex_ret(0, ex);
 
-	mclex_block_t b = program->block;
+	mclex_block_t b = mclex_block();
 	sb_append_cs(b->source, "};\n");
 
-	sb_t var_sb = sb_create(program->heap);
+	sb_t var_sb = sb_create(mclex_heap());
 	sb_append(var_sb, mclt_name(b->var_type));
 	sb_append(var_sb, b->var_name);
 	sb_append_cs(var_sb, ";\n");
@@ -112,8 +108,8 @@ mclex_t mclex_end(mclex_t ex) {
 	if(b->parent)
 		sb_append_sb(b->parent->source, b->source);
 	else
-		sb_append_sb(program->local_source, b->source);
-	program->block = b->parent;
+		sb_append_sb(mclex_local_source(), b->source);
+	mclex_program->block = b->parent;
 
 	return r;
 }
@@ -140,9 +136,58 @@ mclex_t mclex_cast(mclt_t t, mclex_t ex) {
 			sb_append_cs(r->source, "))");
 		}
 		return r;
-	} else {
+	} else
 		err_throw(e_mclex_casting_error);
-	}
+}
+
+void mclex_if(mclex_t ex) {
+	if(ex->type == MCLT_VOID)
+		err_throw(e_mclex_casting_error);
+	mclex_begin();
+	sb_t sb = mclex_block_source();
+	sb_preppend_cs(sb, ") ");
+	sb_preppend_sb(sb, ex->source);
+	sb_preppend_cs(sb, "if(");
+}
+void mclex_unless(mclex_t ex) {
+	if(ex->type == MCLT_VOID)
+		err_throw(e_mclex_casting_error);
+	mclex_begin();
+	sb_t sb = mclex_block_source();
+	sb_preppend_cs(sb, ")) ");
+	sb_preppend_sb(sb, ex->source);
+	sb_preppend_cs(sb, "if(!(");
+}
+void mclex_elsif(mclex_t ex) {
+	if(ex->type == MCLT_VOID)
+		err_throw(e_mclex_casting_error);
+	sb_t sb = mclex_block_source();
+	sb_append_cs(sb, "} else if(");
+	sb_append_sb(sb, ex->source);
+	sb_append_cs(sb, ") {\n");
+}
+void mclex_else() {
+	sb_append_cs(mclex_block_source(), "} else {\n");
+}
+
+void mclex_while(mclex_t ex) {
+	if(ex->type == MCLT_VOID)
+		err_throw(e_mclex_casting_error);
+	mclex_begin();
+	sb_t sb = mclex_block_source();
+	sb_preppend_cs(sb, ") ");
+	sb_preppend_sb(sb, ex->source);
+	sb_preppend_cs(sb, "while(");
+}
+
+mclex_t mclex_null(mclt_t t) {
+	if(ex->type == MCLT_VOID)
+		err_throw(e_mclex_casting_error);
+	mclex_t r = mclex_ex(t, 0);
+	sb_append_cs(r->source, "((");
+	sb_append(r->source, mclt_name(t));
+	sb_append_cs(r->source, ") 0)");
+	return r;
 }
 
 

@@ -190,4 +190,43 @@ mclex_t mclex_null(mclt_t t) {
 	return r;
 }
 
+mclex_t mclex_for(mclex_t b, mclex_t e) {
+	b = mclex_cast(MCLT_INT, b);
+	e = mclex_cast(MCLT_INT, e);
+	str_t var_name = mclex_var_name();
+	sb_t for_src = sb_create(mclex_heap());
+	sb_append_cs(for_src, "int ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_i = ");
+		sb_append_sb(for_src, b->source);
+		sb_append_cs(for_src, ";\n");
+	sb_append_cs(for_src, "const int ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_e = ");
+		sb_append_sb(for_src, e->source);
+		sb_append_cs(for_src, ";\n");
+	sb_append_cs(for_src, "const int ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_d = ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_i < ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_e ? 1 : -1;\n");
+	sb_append_cs(for_src, "for(; ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_i != ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_e; ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_i += ");
+		sb_append(for_src, var_name);
+		sb_append_cs(for_src, "_d) ");
+	mclex_begin();
+	sb_preppend_sb(mclex_block_source(), for_src);
+	mclex_t r = mclex_ex(MCLT_INT, 0);
+	sb_append(r->source, var_name);
+	sb_append_cs(r->source, "_i");
+	return r;
+}
+
 

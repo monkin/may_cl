@@ -85,5 +85,33 @@ mclex_t mclex_global_const(str_t name, mclex_t);
 mclex_t mclex_literal(mclt_t tp, const void *val);
 mclex_t mclex_array(mclt_t tp, size_t sz, const void *val);
 
+mclex_t mclex_neg(mclex_t);
+mclex_t mclex_add(mclex_t, mclex_t);
+mclex_t mclex_sub(mclex_t, mclex_t);
+mclex_t mclex_mul(mclex_t, mclex_t);
+mclex_t mclex_div(mclex_t, mclex_t);
+mclex_t mclex_mod(mclex_t, mclex_t);
+
+mclex_t mclex_band(mclex_t, mclex_t);
+mclex_t mclex_bor(mclex_t, mclex_t);
+mclex_t mclex_bxor(mclex_t, mclex_t);
+mclex_t mclex_bnot(mclex_t);
+
+mclex_t mclex_and(mclex_t, mclex_t);
+mclex_t mclex_or(mclex_t, mclex_t);
+mclex_t mclex_not(mclex_t);
+
+mclex_t mclex_cmp_e(mclex_t, mclex_t);
+mclex_t mclex_cmp_g(mclex_t, mclex_t);
+mclex_t mclex_cmp_ge(mclex_t, mclex_t);
+mclex_t mclex_cmp_l(mclex_t, mclex_t);
+mclex_t mclex_cmp_le(mclex_t, mclex_t);
+mclex_t mclex_cmp_ne(mclex_t, mclex_t);
+#define mclex_cmp_ng(op1, op2) mclex_cmp_le(op1, op2)
+#define mclex_cmp_nl(op1, op2) mclex_cmp_ge(op1, op2)
+#define mclex_cmp_nge(op1, op2) mclex_cmp_l(op1, op2)
+#define mclex_cmp_nle(op1, op2) mclex_cmp_g(op1, op2)
+
+
 #endif /* MAY_CL_EX_H */
 

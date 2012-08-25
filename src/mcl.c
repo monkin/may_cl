@@ -84,6 +84,17 @@ mclt_t mclt_promote(mclt_t t1, mclt_t t2) {
 	return mclt_promote_std(t1, t2);
 }
 
+mclt_t mclt_promote_bool(mclt_t t) {
+	if(t == MCLT_VOID)
+		err_throw(e_mclt_error);
+	if(mclt_is_integer(t) || mclt_is_vector_of_integer(t))
+		return t
+	else if(mclt_is_vector(t))
+		return mclt_vector(MCLT_INT, mclt_vector_size(t));
+	else
+		return MCLT_INT;
+}
+
 /**
  * t1 can be explicitly converted to t2
  */

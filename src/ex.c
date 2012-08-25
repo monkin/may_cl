@@ -350,9 +350,141 @@ mclex_t mclex_array(mclt_t tp, size_t sz, const void *val) {
 			mclex_literal_i(r->source, pt, ((const char *) val) + mclt_sizeof(pt)*i);
 		}
 		sb_append_cs(r->source, "}");
-		mclex_literal_i(r->source, tp, val);
 	} else
 		err_throw(e_mclex_casting_error);
 	return r;
+}
+
+/* operators */
+
+mclex_t mclex_neg(mclex_t ex) {
+	if(mclt_is_vector(ex->type) || mclt_is_scalar(ex->type)) {
+		mclex_t r = mclex_ex(ex->type, 0);
+		sb_append_cs(r->source, "(-");
+		sb_append_sb(r->source, ex->source);
+		sb_append_cs(r->source, ")");
+		return r;
+	} else
+		err_throw(e_mclex_casting_error);
+}
+
+static void mclex_binary_op_source(sb_t sb, const char *op, mclex_t a1, mclex_t a2) {
+	sb_append_cs(sb, "(");
+	sb_append_sb(sb, a1->source);
+	sb_append_cs(sb, op);
+	sb_append_sb(sb, a2->source);
+	sb_append_cs(sb, ")");
+}
+
+static mclex_t mclex_binary_op(const char *op, mclex_t a1, mclex_t a2) {
+	mclt_t rt = mclt_promote(a1->type, a2->type);
+	mclex_t r = mclex_ex(rt, 0);
+	sb_t sb = r->source;
+	mclex_binary_op_source(r->source, op, mcex_cast(rt, a1), mcex_cast(rt, a2));
+	return r;
+}
+
+mclex_t mclex_add(mclex_t op1, mclex_t op2) {
+	if(mclt_is_pointer(op1) && mclt_is_integer(op2)) {
+		mclex_t r = mclex_ex(op1->type, 0);
+		mclex_binary_op_source(r->source, " + ", op1, op2);
+		return r;
+	} else if(mclt_is_pointer(op2))
+		return mclex_add(op2, op1);
+	else
+		return mclex_binary_op(" + ", op1, op2);
+}
+mclex_t mclex_sub(mclex_t op1, mclex_t op2) {
+	if(mclt_is_pointer(op1) && mclt_is_integer(op2)) {
+		mclex_t r = mclex_ex(op1->type, 0);
+		mclex_binary_op_source(r->source, " - ", op1, op2);
+		return r;
+	} else if(mclt_is_pointer(op1) && mclt_is_pointer(op2)) {
+		if((op1->type == op2->type) ? mclt_pointer_to(op1)!=MCLT_VOID : false) {
+			mclex_t r = mclex_ex(MCLT_LONG, 0);
+			sb_append_cs(r->source, "((long) (");
+			mclex_binary_op_source(r->source, " - ", op1, op2);
+			sb_append_cs(r->source, "))");
+			sb_t sb = r->source;
+		} else
+			err_throw(e_mclex_casting_error);
+	} else
+		return mclex_binary_op(" - ", op1, op2);
+}
+mclex_t mclex_mul(mclex_t op1, mclex_t op2) {
+	return mclex_binary_op(" * ", op1, op2);
+}
+mclex_t mclex_div(mclex_t op1, mclex_t op2) {
+	return mclex_binary_op(" / ", op1, op2);
+}
+
+static mclex_t  mclex_binary_int_op(const char *op, mclex_t a1, mclex_t a2) {
+	if((mclt_is_integer(a1) || mclt_is_vector_of_integer(a1)) && (mclt_is_integer(a2) || mclt_is_vector_of_integer(a2)))
+		return mclex_binary_op(op, a1, a2);
+	else
+		err_throw(e_mclex_casting_error);
+}
+mclex_t mclex_mod(mclex_t op1, mclex_t op2) {
+	return mclex_binary_int_op(" % ", op1, op2);
+}
+
+mclex_t mclex_band(mclex_t op1, mclex_t op2) {
+	return mclex_binary_int_op(" & ", op1, op2);
+}
+mclex_t mclex_bor(mclex_t op1, mclex_t op2) {
+	return mclex_binary_int_op(" | ", op1, op2);
+}
+mclex_t mclex_bxor(mclex_t op1, mclex_t op2) {
+	return mclex_binary_int_op(" ^ ", op1, op2);
+}
+
+mclex_t mclex_bnot(mclex_t op) {
+	if(mclt_is_vector_of_integer(ex->type) || mclt_is_integer(ex->type)) {
+		mclex_t r = mclex_ex(ex->type, 0);
+		sb_append_cs(r->source, "(~");
+		sb_append_sb(r->source, ex->source);
+		sb_append_cs(r->source, ")");
+		return r;
+	} else
+		err_throw(e_mclex_casting_error);
+}
+
+static mclex_t mclex_binary_logic_op(const char *op, mclex_t a1, mclex_t a2) {
+	mclex_t r = mclex_binary_int_op(op, a1, a2);
+	r->type = mclt_promote_bool(r);
+	return r;
+}
+
+mclex_t mclex_and(mclex_t op1, mclex_t op2) {
+	return mclex_binary_logic_op(" && ", op1, op2);
+}
+mclex_t mclex_or(mclex_t op1, mclex_t op2) {
+	return mclex_binary_logic_op(" || ", op1, op2);
+}
+mclex_t mclex_not(mclex_t ex) {
+	mclex_t r = mclex_ex(mclt_promote_bool(ex->type), 0);
+	sb_append_cs(r->source, "(!");
+	sb_append_sb(r->source, ex->source);
+	sb_append_cs(r->source, ")");
+	return r;
+}
+
+mclex_t mclex_cmp_e(mclex_t, mclex_t) {
+	return mclex_binary_logic_op(" == ", op1, op2);
+}
+mclex_t mclex_cmp_g(mclex_t, mclex_t) {
+	return mclex_binary_logic_op(" > ", op1, op2);
+}
+mclex_t mclex_cmp_ge(mclex_t, mclex_t) {
+	return mclex_binary_logic_op(" >= ", op1, op2);
+}
+mclex_t mclex_cmp_l(mclex_t, mclex_t) {
+	return mclex_binary_logic_op(" < ", op1, op2);
+}
+mclex_t mclex_cmp_le(mclex_t, mclex_t) {
+	return mclex_binary_logic_op(" <= ", op1, op2);
+}
+mclex_t mclex_cmp_ne(mclex_t, mclex_t) {
+	return mclex_binary_logic_op(" != ", op1, op2);
 }
 

@@ -82,8 +82,12 @@ mclt_t mclt_pointer(mclt_t t, long mem_type);
 mclt_t mclt_vector_of(mclt_t t1);
 mclt_t mclt_vector_size(mclt_t t1);
 mclt_t mclt_pointer_to(mclt_t t1);
+/* Type promotion that can convert vectors with different types and the same size. */  
 mclt_t mclt_promote(mclt_t t1, mclt_t t2);
+/* Type promotion as in OpenCL standard, used for block result */
 mclt_t mclt_promote_std(mclt_t t1, mclt_t t2);
+/* Result type for boolean operator */ 
+mclt_t mclt_promote_bool(mclt_t t);
 bool mclt_convertable_to(mclt_t t1, mclt_t t2);
 str_t mclt_name(mclt_t);
 mclt_t mclt_parse(str_t);

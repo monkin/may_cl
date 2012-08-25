@@ -25,6 +25,7 @@ typedef struct mclex_program_ss {
 	sb_t arguments_source;
 	map_t arguments;
 	str_t source;
+	map_t global_flags;
 	unsigned long counter; // Used to generate variables names.
 } mclex_program_s;
 

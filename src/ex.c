@@ -30,6 +30,7 @@ void mclex_program_begin() {
 		mclex_program->arguments_source = sb_create(h);
 		mclex_program->arguments = map_create(h);
 		mclex_program->source = 0;
+		mclex_program->global_flags = map_create(h);
 		mclex_program->counter = 0;
 	} err_catch {
 		h = heap_delete(h);
@@ -229,4 +230,64 @@ mclex_t mclex_for(mclex_t b, mclex_t e) {
 	return r;
 }
 
+
+static mclex_t mclex_var_i(mclex_t ex, sb_t sb, long mem_type) {
+	if(ex->type == MCLT_VOID)
+		err_throw(e_mclex_casting_error);
+	mclex_t r = mclex_ex(ex->type, mem_type);
+	str_t name = mclex_var_name();
+	sb_append(r->source, name);
+	sb_append(bs, mclt_name(r->type));
+	sb_append_cs(bs, " ");
+	sb_append_sb(bs, name);
+	sb_append_cs(bs, " = ");
+	sb_append_sb(bs, ex->source);
+	sb_append_cs(bs, ";\n");
+	return r;
+}
+
+mclex_t mclex_var(mclex_t ex) {
+	return mclex_var_i(ex, mclex_block_source(), MCL_MEM_PRIVATE);
+}
+
+mclex_t mclex_global_var(str_t name, mclex_t ex) {
+	mclex_t r = (mclex_t) map_get(mclex_program->global_flags, name);
+	if(!r) {
+		r = (mclex_t) mclex_var_i(ex, mclex_global_source(), 0);
+		map_set(mclex_program->global_flags, name, r);
+	}
+	return r;
+}
+
+static mclex_t mclex_const_i(mclex_t ex, sb_t sb) {	
+	if(ex->type == MCLT_VOID)
+		err_throw(e_mclex_casting_error);
+	mclex_t r = mclex_ex(ex->type, mem_type);
+	str_t name = mclex_var_name();
+	sb_append(r->source, name);
+	if(!mclt_is_pointer(ex->type))
+		sb_append_cs(bs, "const ");
+	sb_append(bs, mclt_name(r->type));
+	sb_append_cs(bs, " ");
+	sb_append_sb(bs, name);
+	if(mclt_is_pointer(ex->type))
+		sb_append_cs(bs, " const ");
+	sb_append_cs(bs, " = ");
+	sb_append_sb(bs, ex->source);
+	sb_append_cs(bs, ";\n");
+	return r;
+}
+
+mclex_t mclex_const(mclex_t ex) {
+	return mclex_const_i(ex, mclex_block_source());
+}
+
+mclex_t mclex_global_const(str_t name, mclex_t ex) {
+	mclex_t r = (mclex_t) map_get(mclex_program->global_flags, name);
+	if(!r) {
+		r = (mclex_t) mclex_const_i(ex, mclex_global_source());
+		map_set(mclex_program->global_flags, name, r);
+	}
+	return r;
+}
 

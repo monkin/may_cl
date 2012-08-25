@@ -303,30 +303,54 @@ static void mclex_literal_bytes(sb_t sb, const char *data, size_t sz) {
 	sb_append(sb, rs);
 }
 
-mclex_t mclex_literal(mclt_t tp, const void *val) {
-	mclex_t r = mclex_ex(tp, 0);
+void mclex_literal_i(sb_t sb, mclt_t tp, const void *val) {
 	if (mclt_is_vector(tp)) {
 		int i;
 		const mclt_t vt = mclt_vector_type(tp);
 		const int vs = mclt_vector_size(tp);
 		const int vts = mclt_size(vt);
-		sb_append_cs(r->source, "{");
+		sb_append_cs(sb, "((");
+		sb_append(sb, mclt_name(tp));
+		sb_append_cs(sb, ") (");
 		for(i=0; i<vs; i++) {
 			if(i!=0)
-				sb_append_cs(r->source, ", ");
+				sb_append_cs(sb, ", ");
 			mclex_literal(vt, ((const char *) val) + i*vts);
 		}
-		sb_append_cs(r->source, "}");
+		sb_append_cs(sb, "))");
 	} else if(mclt_is_float(tp)) {
-		sb_append_cs(r->source, "as_float(0x");
-		mclex_literal_bytes(r->source, (const char *) val, mclt_sizeof(tp));
-		sb_append_cs(r->source, ")");
+		sb_append_cs(sb, "as_float(0x");
+		mclex_literal_bytes(sb, (const char *) val, mclt_sizeof(tp));
+		sb_append_cs(sb, ")");
 	} else if(mclt_is_integer(tp)) {
-		sb_append_cs(r->source, "((");
-		sb_append(r->source, mclt_name(ex->type));
-		sb_append_cs(r->source, ") 0x");
-		mclex_literal_bytes(r->source, (const char *) val, mclt_sizeof(tp));
-		sb_append_cs(r->source, ")");
+		sb_append_cs(sb, "((");
+		sb_append(sb, mclt_name(tp));
+		sb_append_cs(sb, ") 0x");
+		mclex_literal_bytes(sb, (const char *) val, mclt_sizeof(tp));
+		sb_append_cs(sb, ")");
+	} else
+		err_throw(e_mclex_casting_error);
+}
+
+mclex_t mclex_literal(mclt_t tp, const void *val) {
+	mclex_t r = mclex_ex(tp, 0);
+	mclex_literal_i(r->source, tp, val);
+	return r;
+}
+
+mclex_t mclex_array(mclt_t tp, size_t sz, const void *val) {
+	mclex_t r = mclex_ex(tp, 0);
+	if(mclt_is_pointer(tp)) {
+		size_t i;
+		const pt = mclt_pointer_to(tp);
+		sb_append_cs(r->source, "{");
+		for(i=0; i<sz; i++) {
+			if(i!=0)
+				sb_append_cs(r->source, ", ");
+			mclex_literal_i(r->source, pt, ((const char *) val) + mclt_sizeof(pt)*i);
+		}
+		sb_append_cs(r->source, "}");
+		mclex_literal_i(r->source, tp, val);
 	} else
 		err_throw(e_mclex_casting_error);
 	return r;

@@ -449,6 +449,13 @@ mclex_t mclex_bnot(mclex_t op) {
 		err_throw(e_mclex_casting_error);
 }
 
+mclex_t mclex_shr(mclex_t op1, mclex_t op2) {
+	return mclex_binary_int_op(" >> ", op1, op2);
+}
+mclex_t mclex_shl(mclex_t op1, mclex_t op2) {
+	return mclex_binary_int_op(" << ", op1, op2);
+}
+
 static mclex_t mclex_binary_logic_op(const char *op, mclex_t a1, mclex_t a2) {
 	mclex_t r = mclex_binary_int_op(op, a1, a2);
 	r->type = mclt_promote_bool(r);

@@ -97,6 +97,9 @@ mclex_t mclex_bor(mclex_t, mclex_t);
 mclex_t mclex_bxor(mclex_t, mclex_t);
 mclex_t mclex_bnot(mclex_t);
 
+mclex_t mclex_shl(mclex_t, mclex_t);
+mclex_t mclex_shr(mclex_t, mclex_t);
+
 mclex_t mclex_and(mclex_t, mclex_t);
 mclex_t mclex_or(mclex_t, mclex_t);
 mclex_t mclex_not(mclex_t);
@@ -109,8 +112,6 @@ mclex_t mclex_cmp_le(mclex_t, mclex_t);
 mclex_t mclex_cmp_ne(mclex_t, mclex_t);
 #define mclex_cmp_ng(op1, op2) mclex_cmp_le(op1, op2)
 #define mclex_cmp_nl(op1, op2) mclex_cmp_ge(op1, op2)
-#define mclex_cmp_nge(op1, op2) mclex_cmp_l(op1, op2)
-#define mclex_cmp_nle(op1, op2) mclex_cmp_g(op1, op2)
 
 
 #endif /* MAY_CL_EX_H */

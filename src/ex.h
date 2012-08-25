@@ -85,6 +85,5 @@ mclex_t mclex_global_const(str_t name, mclex_t);
 mclex_t mclex_literal(mclt_t tp, const void *val);
 mclex_t mclex_array(mclt_t tp, size_t sz, const void *val);
 
-
 #endif /* MAY_CL_EX_H */
 

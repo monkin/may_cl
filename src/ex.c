@@ -291,3 +291,44 @@ mclex_t mclex_global_const(str_t name, mclex_t ex) {
 	return r;
 }
 
+static void mclex_literal_bytes(sb_t sb, const char *data, size_t sz) {
+	static char letters[] = "0123456789abcdef";
+	str_t rs = str_create(mclex_heap(), sz*2);
+	str_it_t s = str_begin(r);
+	size_t i;
+	for(i=0; i<sz; i++) {
+		*(s++) = letters[(data[i]>>4) & 0x0f];
+		*(s++) = letters[data[i] & 0x0f];
+	}
+	sb_append(sb, rs);
+}
+
+mclex_t mclex_literal(mclt_t tp, const void *val) {
+	mclex_t r = mclex_ex(tp, 0);
+	if (mclt_is_vector(tp)) {
+		int i;
+		const mclt_t vt = mclt_vector_type(tp);
+		const int vs = mclt_vector_size(tp);
+		const int vts = mclt_size(vt);
+		sb_append_cs(r->source, "{");
+		for(i=0; i<vs; i++) {
+			if(i!=0)
+				sb_append_cs(r->source, ", ");
+			mclex_literal(vt, ((const char *) val) + i*vts);
+		}
+		sb_append_cs(r->source, "}");
+	} else if(mclt_is_float(tp)) {
+		sb_append_cs(r->source, "as_float(0x");
+		mclex_literal_bytes(r->source, (const char *) val, mclt_sizeof(tp));
+		sb_append_cs(r->source, ")");
+	} else if(mclt_is_integer(tp)) {
+		sb_append_cs(r->source, "((");
+		sb_append(r->source, mclt_name(ex->type));
+		sb_append_cs(r->source, ") 0x");
+		mclex_literal_bytes(r->source, (const char *) val, mclt_sizeof(tp));
+		sb_append_cs(r->source, ")");
+	} else
+		err_throw(e_mclex_casting_error);
+	return r;
+}
+

@@ -138,12 +138,12 @@ mclex_t mclex_cast(mclt_t t, mclex_t ex) {
 		}
 		return r;
 	} else
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 }
 
 void mclex_if(mclex_t ex) {
 	if(ex->type == MCLT_VOID)
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	mclex_begin();
 	sb_t sb = mclex_block_source();
 	sb_preppend_cs(sb, ") ");
@@ -152,7 +152,7 @@ void mclex_if(mclex_t ex) {
 }
 void mclex_unless(mclex_t ex) {
 	if(ex->type == MCLT_VOID)
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	mclex_begin();
 	sb_t sb = mclex_block_source();
 	sb_preppend_cs(sb, ")) ");
@@ -161,7 +161,7 @@ void mclex_unless(mclex_t ex) {
 }
 void mclex_elsif(mclex_t ex) {
 	if(ex->type == MCLT_VOID)
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	sb_t sb = mclex_block_source();
 	sb_append_cs(sb, "} else if(");
 	sb_append_sb(sb, ex->source);
@@ -173,7 +173,7 @@ void mclex_else() {
 
 void mclex_while(mclex_t ex) {
 	if(ex->type == MCLT_VOID)
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	mclex_begin();
 	sb_t sb = mclex_block_source();
 	sb_preppend_cs(sb, ") ");
@@ -183,7 +183,7 @@ void mclex_while(mclex_t ex) {
 
 mclex_t mclex_null(mclt_t t) {
 	if(ex->type == MCLT_VOID)
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	mclex_t r = mclex_ex(t, 0);
 	sb_append_cs(r->source, "((");
 	sb_append(r->source, mclt_name(t));
@@ -233,7 +233,7 @@ mclex_t mclex_for(mclex_t b, mclex_t e) {
 
 static mclex_t mclex_var_i(mclex_t ex, sb_t sb, long mem_type) {
 	if(ex->type == MCLT_VOID)
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	mclex_t r = mclex_ex(ex->type, mem_type);
 	str_t name = mclex_var_name();
 	sb_append(r->source, name);
@@ -261,7 +261,7 @@ mclex_t mclex_global_var(str_t name, mclex_t ex) {
 
 static mclex_t mclex_const_i(mclex_t ex, sb_t sb) {	
 	if(ex->type == MCLT_VOID)
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	mclex_t r = mclex_ex(ex->type, mem_type);
 	str_t name = mclex_var_name();
 	sb_append(r->source, name);
@@ -329,7 +329,7 @@ void mclex_literal_i(sb_t sb, mclt_t tp, const void *val) {
 		mclex_literal_bytes(sb, (const char *) val, mclt_sizeof(tp));
 		sb_append_cs(sb, ")");
 	} else
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 }
 
 mclex_t mclex_literal(mclt_t tp, const void *val) {
@@ -351,7 +351,7 @@ mclex_t mclex_array(mclt_t tp, size_t sz, const void *val) {
 		}
 		sb_append_cs(r->source, "}");
 	} else
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 	return r;
 }
 
@@ -365,7 +365,7 @@ mclex_t mclex_neg(mclex_t ex) {
 		sb_append_cs(r->source, ")");
 		return r;
 	} else
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 }
 
 static void mclex_binary_op_source(sb_t sb, const char *op, mclex_t a1, mclex_t a2) {
@@ -407,7 +407,7 @@ mclex_t mclex_sub(mclex_t op1, mclex_t op2) {
 			sb_append_cs(r->source, "))");
 			sb_t sb = r->source;
 		} else
-			err_throw(e_mclex_casting_error);
+			err_throw(e_mclex_error);
 	} else
 		return mclex_binary_op(" - ", op1, op2);
 }
@@ -422,7 +422,7 @@ static mclex_t  mclex_binary_int_op(const char *op, mclex_t a1, mclex_t a2) {
 	if((mclt_is_integer(a1) || mclt_is_vector_of_integer(a1)) && (mclt_is_integer(a2) || mclt_is_vector_of_integer(a2)))
 		return mclex_binary_op(op, a1, a2);
 	else
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 }
 mclex_t mclex_mod(mclex_t op1, mclex_t op2) {
 	return mclex_binary_int_op(" % ", op1, op2);
@@ -446,7 +446,7 @@ mclex_t mclex_bnot(mclex_t op) {
 		sb_append_cs(r->source, ")");
 		return r;
 	} else
-		err_throw(e_mclex_casting_error);
+		err_throw(e_mclex_error);
 }
 
 mclex_t mclex_shr(mclex_t op1, mclex_t op2) {
@@ -493,5 +493,55 @@ mclex_t mclex_cmp_le(mclex_t, mclex_t) {
 }
 mclex_t mclex_cmp_ne(mclex_t, mclex_t) {
 	return mclex_binary_logic_op(" != ", op1, op2);
+}
+
+/* pointer operators */
+
+mclex_t mclex_ref(mclex_t op) {
+	mclt_t ot = op->type;
+	if(op->mem_type && (mclt_is_vector(ot) || mclt_is_scalar(ot))) {
+		mclex_t r = mclex_ex(mclt_pointer(ot, op->mem_type), 0);
+		sb_append_cs(r->source, "(&");
+		sb_append_sb(r->source, op->source);
+		sb_append_cs(r->source, ")");
+		return r;
+	} else
+		err_throw(e_mclex_error);
+}
+mclex_t mclex_def(mclex_t op) {
+	mclt_t ot = op->type;
+	if(mclt_is_pointer(ot) && mclt_pointer_to(ot)!=MCLT_VOID) {
+		mclex_t r = mclex_ex(mclt_pointer_to(ot), mclt_pointer_type(ot));
+		sb_append_cs(r->source, "(*");
+		sb_append_sb(r->source, op->source);
+		sb_append_cs(r->source, ")");
+		return r;
+	} else
+		err_throw(e_mclex_error);
+}
+mclex_t mclex_index(mclex_t op1, mclex_t op2) {
+	mclt_t ot = op1->type;
+	if(mclt_is_pointer(ot) && mclt_pointer_to(ot)!=MCLT_VOID && mclt_is_integer(op2->type)) {
+		mclex_t r = mclex_ex(mclt_pointer_to(ot), mclt_pointer_type(ot));
+		sb_append_cs(r->source, "(");
+		sb_append_sb(r->source, op1->source);
+		sb_append_cs(r->source, "[");
+		sb_append_sb(r->source, op2->source);
+		sb_append_cs(r->source, "])");
+		return r;
+	} else
+		err_throw(e_mclex_error);
+}
+
+void mclex_set(mclex_t lv, mclex_t rv) {
+	if(lv->mem_type && lv->mem_type!=MCL_MEM_CONSTANT) {
+		rv = mclex_cast(lv->type, rv);
+		sb_t  sb = mclex_local_source();
+		sb_append_sb(sb, lv->source);
+		sb_append_cs(sb, " = ");
+		sb_append_sb(sb, rv->source);
+		sb_append_cs(sb, ";\n");
+	} else
+		err_throw(e_mclex_error);
 }
 

@@ -6,7 +6,7 @@
 #include <may/core/lib.h>
 #include <stdbool.h>
 
-ERR_DECLARE(e_mclex_casting_error);
+ERR_DECLARE(e_mclex_error);
 
 typedef struct mclex_block_ss {
 	sb_t source;
@@ -26,7 +26,7 @@ typedef struct mclex_program_ss {
 	map_t arguments;
 	str_t source;
 	map_t global_flags;
-	unsigned long counter; // Used to generate variables names.
+	unsigned long counter; /* Used to generate variables names. */
 } mclex_program_s;
 
 typedef mclex_program_s *mclex_program_t;
@@ -40,7 +40,7 @@ extern __thread mclex_program_t mclex_program;
 #define mclex_block_source() (mclex_block()->source)
 
 void mclex_program_begin();
-void mclex_program_reset(); // Remove all current program data and stop building.
+void mclex_program_reset(); /* Remove all current program data and stop building. */
 mclex_program_t mclex_program_end();
 mclex_program_t mclex_program_delete(mclex_program_t);
 
@@ -54,24 +54,24 @@ typedef mclex_s *mclex_t;
 
 mclex_t mclex_ex(mclt_t);
 
-void mclex_begin(); // block
+void mclex_begin(); /* block */
 mclex_block_t mclex_current_block();
 /**
  * If block is null, current block used.
  */
-void mclex_ret(mclex_block_t, mclex_t); // set block result
-mclex_t mclex_end(mclex_t); // ~block
+void mclex_ret(mclex_block_t, mclex_t); /* set block result */
+mclex_t mclex_end(mclex_t); /* ~block */
 
-void mclex_if(mclex_t); // block
-void mclex_unless(mclex_t); // block
+void mclex_if(mclex_t); /* block */
+void mclex_unless(mclex_t); /* block */
 void mclex_elsif(mclex_t);
 void mclex_else();
 
-void mclex_while(mclex_t); // block
+void mclex_while(mclex_t); /* block */
 /**
  * Gets two integer expressions and return iterator value.
  */
-mclex_t mclex_for(mclex_t, mclex_t); // block
+mclex_t mclex_for(mclex_t, mclex_t); /* block */
 
 mclex_t mclex_cast(mclt_t, mclex_t);
 
@@ -112,6 +112,14 @@ mclex_t mclex_cmp_le(mclex_t, mclex_t);
 mclex_t mclex_cmp_ne(mclex_t, mclex_t);
 #define mclex_cmp_ng(op1, op2) mclex_cmp_le(op1, op2)
 #define mclex_cmp_nl(op1, op2) mclex_cmp_ge(op1, op2)
+
+/* reference/deference operators */
+mclex_t mclex_ref(mclex_t);
+mclex_t mclex_def(mclex_t);
+mclex_t mclex_index(mclex_t, mclex_t);
+
+void mclex_set(mclex_t lv, mclex_t rv);
+
 
 
 #endif /* MAY_CL_EX_H */

@@ -75,7 +75,7 @@ typedef long mclt_t;
 #define mclt_is_unsigned(t) ((t)&MCLT_UNSIGNED)
 #define mclt_is_signed(t) (!((t)&MCLT_UNSIGNED))
 #define mclt_integer_size(t) (1<<((MCLT_I_SIZE & (t))-1))
-#define mclt_pointer_type(t) ((t) & (MCL_MEM_GLOBAL | MCL_MEM_LOCAL | MCL_MEM_PRIVATE))
+#define mclt_pointer_type(t) ((t) & (MCL_MEM_GLOBAL | MCL_MEM_LOCAL | MCL_MEM_PRIVATE | MCL_MEM_CONSTANT))
 size_t mclt_sizeof(mclt_t);
 mclt_t mclt_vector(mclt_t t1, int vector_size);
 mclt_t mclt_pointer(mclt_t t, long mem_type);

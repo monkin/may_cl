@@ -13,6 +13,7 @@ mclex_t mclex_ex(mclt_t t, long mem_type) {
 	ex->type = t;
 	ex->source = sb_create(mclex_heap());
 	ex->mem_type = mem_type;
+	ex->argument_index = 0;
 	return ex;
 }
 
@@ -28,7 +29,7 @@ void mclex_program_begin() {
 		mclex_program->global_source = sb_create(h);
 		mclex_program->local_source = sb_create(h);
 		mclex_program->arguments_source = sb_create(h);
-		mclex_program->arguments = map_create(h);
+		mclex_program->arguments_count = 0;
 		mclex_program->source = 0;
 		mclex_program->global_flags = map_create(h);
 		mclex_program->counter = 0;
@@ -541,6 +542,22 @@ void mclex_set(mclex_t lv, mclex_t rv) {
 		sb_append_cs(sb, " = ");
 		sb_append_sb(sb, rv->source);
 		sb_append_cs(sb, ";\n");
+	} else
+		err_throw(e_mclex_error);
+}
+
+mclex_t mclex_arg(mclt_t t) {
+	if(t!=MCLT_VOID) {
+		str_t nm = mclex_var_name();
+		mclex_t r = mclex_ex(t, 0);
+		r->argument_index = mclex_program->arguments_count++;
+		if(r->argument_index)
+			sb_append_cs(mclex_program->arguments_source, ", ");
+		sb_append(mclex_program->arguments_source, mclt_name(t));
+		sb_append_cs(mclex_program->arguments_source, " ");
+		sb_append(mclex_program->arguments_source, nm);
+		sb_append(r->source, nm);
+		return r;
 	} else
 		err_throw(e_mclex_error);
 }

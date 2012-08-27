@@ -23,7 +23,7 @@ typedef struct mclex_program_ss {
 	sb_t global_source;
 	sb_t local_source;
 	sb_t arguments_source;
-	map_t arguments;
+	long arguments_count;
 	str_t source;
 	map_t global_flags;
 	unsigned long counter; /* Used to generate variables names. */
@@ -48,6 +48,7 @@ typedef struct {
 	mclt_t type;
 	sb_t source;
 	long mem_type; /* Only for lvalues, in other cases should be 0 */
+	long argument_index;
 } mclex_s;
 
 typedef mclex_s *mclex_t;
@@ -119,6 +120,8 @@ mclex_t mclex_def(mclex_t);
 mclex_t mclex_index(mclex_t, mclex_t);
 
 void mclex_set(mclex_t lv, mclex_t rv);
+
+mclex_t mclex_arg(mclt_t);
 
 
 

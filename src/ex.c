@@ -595,13 +595,21 @@ mclex_t mclex_v_end() {
 mclex_t mclex_v_index(mclex_t ex, str_t s) {
 	mclex_t r = mclex_ex(mclex_vector(mclex_vector_of(ex->type), s->length), ex->mem_type);
 	str_it_t i;
+	bool is_xyzw = false;
+	bool is_s = false;
 	for(i=str_begin(s); i<str_end(s); s++) {
-		if(!((*i>='0' && *i<='9') || (*i>='a' && *i<='f') || (*i>='A' && *i<='F')))
+		if(((*i>='0' && *i<='9') || (*i>='a' && *i<='f') || (*i>='A' && *i<='F')) && !is_xyzw)
+			is_s = true;
+		else if((*i=='x' || *i=='y' || *i=='z' || *i=='w') && !is_s)
+			is_xyzw = true;
+		else
 			err_throw(e_mclex_error);
 	}
 	sb_append_sb(r->source, ex->source);
-	sb_append_cs(r->source, ".s");
+	if(is_xyzw)
+		sb_append_cs(r->source, ".");
+	else
+		sb_append_cs(r->source, ".s");
 	sb_append(r->source, s);
 	return r;
 }
-

@@ -10,9 +10,20 @@ ERR_DEFINE(e_mclt_parsing_error, "Invalid type name", e_mclt_error);
 ERR_DEFINE(e_mclt_size_undefined, "Can't determine type size", e_mclt_error);
 
 mclt_t mclt_vector(mclt_t t, int vector_size) {
-	if(!mclt_is_numeric(t) || !(vector_size==2 || vector_size==3 || vector_size==4 || vector_size==8 || vector_size==16))
+	if(mclt_is_numeric(t)) {
+		switch(vector_size) {
+			case 2:
+			case 3:
+			case 4:
+			case 8:
+			case 16:
+				return t | (vector_size<<8);
+			default:
+				err_throw(e_mclt_error);
+		}
+	} else {
 		err_throw(e_mclt_error);
-	return t | (vector_size<<8);
+	}
 }
 
 mclt_t mclt_pointer(mclt_t t, long mem_type) {

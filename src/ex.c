@@ -562,3 +562,46 @@ mclex_t mclex_arg(mclt_t t) {
 		err_throw(e_mclex_error);
 }
 
+/* vector functions */
+void mclex_v_begin() {
+	if(mclex_program->v_count!=0)
+		err_throw(e_mclex_error);
+}
+void mclex_v(mclex_t ex) {
+	if(mclex_program->v_count>15 || !(mclt_is_scalar(ex->type) || mclt_is_vector(ex->type)))
+		err_throw(e_mclex_error);
+	mclex_program->v_items[mclex_program->v_count] = ex;
+}
+mclex_t mclex_v_end() {
+	int i, vsz = 0;
+	mclt_t vt;
+	mclex_t r;
+	for(i=0; i<mclex_program->v_count; i++) {
+		mclt_t t = mclex_program->v_items[i];
+		mclt_t st = mclt_is_scalar(t) ? t : mclt_vector_of(t)
+		vsz += t==st ? 1 : mclt_vector_size(t);
+		vt = i ? mclt_promote(vt, st) : st;
+	}
+	r = mclex_ex(mclt_vector(vt, vsz), 0);
+	sb_append_cs(r->source, "((");
+	sb_append(r->source, mclt_name(r->type));
+	sb_append_cs(r->source, ") (");
+	for(i=0; i<mclex_program->v_count; i++)
+		sb_append_sb(r->source, mclex_program->v_items[i]->source);
+	sb_append_cs(r->source, "))");
+	return r;
+}
+
+mclex_t mclex_v_index(mclex_t ex, str_t s) {
+	mclex_t r = mclex_ex(mclex_vector(mclex_vector_of(ex->type), s->length), ex->mem_type);
+	str_it_t i;
+	for(i=str_begin(s); i<str_end(s); s++) {
+		if(!((*i>='0' && *i<='9') || (*i>='a' && *i<='f') || (*i>='A' && *i<='F')))
+			err_throw(e_mclex_error);
+	}
+	sb_append_sb(r->source, ex->source);
+	sb_append_cs(r->source, ".s");
+	sb_append(r->source, s);
+	return r;
+}
+

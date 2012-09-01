@@ -8,6 +8,10 @@
 
 ERR_DECLARE(e_mclex_error);
 
+struct mclex_ss;
+typedef struct mclex_ss mclex_s;
+typedef mclex_s *mclex_t;
+
 typedef struct mclex_block_ss {
 	sb_t source;
 	mclt_t var_type;
@@ -27,6 +31,8 @@ typedef struct mclex_program_ss {
 	str_t source;
 	map_t global_flags;
 	unsigned long counter; /* Used to generate variables names. */
+	mclex_t v_items[16];
+	int v_count;
 } mclex_program_s;
 
 typedef mclex_program_s *mclex_program_t;
@@ -44,14 +50,12 @@ void mclex_program_reset(); /* Remove all current program data and stop building
 mclex_program_t mclex_program_end();
 mclex_program_t mclex_program_delete(mclex_program_t);
 
-typedef struct {
+typedef struct mclex_ss {
 	mclt_t type;
 	sb_t source;
 	long mem_type; /* Only for lvalues, in other cases should be 0 */
 	long argument_index;
-} mclex_s;
-
-typedef mclex_s *mclex_t;
+};
 
 mclex_t mclex_ex(mclt_t);
 
@@ -123,7 +127,11 @@ void mclex_set(mclex_t lv, mclex_t rv);
 
 mclex_t mclex_arg(mclt_t);
 
-
+void mclex_v_begin();
+void mclex_v(mclex_t);
+mclex_t mclex_v_end();
+mclex_t mclex_v_index(mclex_t, str_t);
+#define mclex_v_index_cs(ex, s) mclex_v_index((ex), str_form_cs(mclex_heap(), (s)))
 
 #endif /* MAY_CL_EX_H */
 

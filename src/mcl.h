@@ -95,8 +95,5 @@ mclt_t mclt_parse_cs(const char *);
 long mclt_size(mclt_t);
 void mclt_init();
 
-#include "ex.h"
-
-
 #endif /* MAY_MCL_H */
 

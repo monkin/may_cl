@@ -692,6 +692,25 @@ mclex_t mclex_fn_int_2(const char *nm, mclex_t a1, mclex_t a2) {
 		err_throw(e_mclex_error);
 }
 
+mclex_t mclex_fn_int_3(const char *nm, mclex_t a1, mclex_t a2, mclex_t a3) {
+	mclt_t rt = mclt_promote(mclt_promote(a1->type, a2->type), a3->type);
+	if(mclt_is_integer(rt) || mclt_is_vector_of_integer(rt)) {
+		mclex_t r = mclex_ex(rt, 0);
+		a1 = mclex_cast(rt, a1);
+		a2 = mclex_cast(rt, a2);
+		a3 = mclex_cast(rt, a3);
+		sb_append_cs(r->source, nm);
+		sb_append_cs(r->source, "(");
+		sb_append_sb(r->source, a1->source);
+		sb_append_cs(r->source, ", ");
+		sb_append_sb(r->source, a2->source);
+		sb_append_cs(r->source, ", ");
+		sb_append_sb(r->source, a3->source);
+		sb_append_cs(r->source, ")");
+	} else
+		err_throw(e_mclex_error);
+}
+
 mclex_t mclex_add_sat(mclex_t a1, mclex_t a2) {
 	return mclex_fn_int_2("add_sat", a1, a2);
 }
@@ -729,4 +748,11 @@ mclex_t mclex_clamp(mclex_t a1, mclex_t a2, mclex_t a3) {
 	sb_append_sb(r->source, a3->source);
 	sb_append_cs(r->source, ")");
 	return r;
+}
+
+mclex_t mclex_mad_hi(mclex_t a1, mclex_t a2, mclex_t a3) {
+	return mclex_fn_int_3("mad_hi", a1, a2, a3);
+}
+mclex_t mclex_mad_sat(mclex_t a1, mclex_t a2, mclex_t a3) {
+	return mclex_fn_int_3("mad_sat", a1, a2, a3);
 }

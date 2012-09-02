@@ -151,9 +151,10 @@ mclex_t mclex_rhadd(mclex_t, mclex_t); /* T rhadd (T x, T y) (x + y + 1) >> 1 */
 mclex_t mclex_clz(mclex_t); /* T clz (T x) Number of leading 0-bits in x */
 mclex_t mclex_clamp(mclex_t, mclex_t, mclex_t); /* T clamp (T x, T min, T max) */
 
-/*T mad_hi (T a, T b, T c) mul_hi(a, b) + c
-T mad_sat (T a, T b, T c) a * b + c and saturates the result
-T max (T x, T y)
+mclex_t mclex_mad_hi(mclex_t, mclex_t, mclex_t); /* T mad_hi (T a, T b, T c) mul_hi(a, b) + c */
+mclex_t mclex_mad_sat(mclex_t, mclex_t, mclex_t); /* T mad_sat (T a, T b, T c) a * b + c and saturates the result */
+
+/*T max (T x, T y)
 T max (T x, S y)
 y if x < y, otherwise it returns x
 T min (T x, T y) y if y < x, otherwise it returns x

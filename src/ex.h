@@ -133,5 +133,14 @@ mclex_t mclex_v_end();
 mclex_t mclex_v_index(mclex_t, str_t);
 #define mclex_v_index_cs(ex, s) mclex_v_index((ex), str_form_cs(mclex_heap(), (s)))
 
+mclex_t mclex_get_work_dim(); /* uint get_work_dim() */
+mclex_t mclex_get_local_id(int d); /* size_t get_local_id(uint D) */
+mclex_t mclex_get_global_size(int d); /* size_t get_global_size(uint D) */
+mclex_t mclex_get_num_groups(int d); /* size_t get_num_groups (uint D) */
+mclex_t mclex_get_global_id(int d); /* size_t get_global_id (uint D) */
+mclex_t mclex_get_group_id(int d); /* size_t get_group_id (uint D) */
+mclex_t mclex_get_local_size(int d); /* size_t get_local_size (uint D) */
+mclex_t mclex_get_global_offset(int d); /* size_t get_global_offset (uint D) */
+
 #endif /* MAY_CL_EX_H */
 

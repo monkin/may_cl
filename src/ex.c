@@ -613,3 +613,45 @@ mclex_t mclex_v_index(mclex_t ex, str_t s) {
 	sb_append(r->source, s);
 	return r;
 }
+
+/* work item functions */
+
+mclex_t mclex_get_work_dim() {
+	mclex_t r = mclex_ex(MCLT_UINT, 0);
+	sb_sppend_cs(r->source, "get_work_dim()");
+	return r;
+}
+
+static mclex_t mclex_work_item_fn(const char *nm, int d) {
+	if(d<0 && d>2)
+		err_throw(e_mclex_error);
+	mclex_t r = mclex_ex(MCLEX_LONG, 0);
+	sb_append_cs(r->source, "((long) "
+	sb_append_cs(r->source, nm)
+	sb_append_cs(r->source, "(");
+	sb_append(r->source, str_from_int(mclex_heap(), d));
+	sb_append_cs(r->source, "))");
+	return r;
+}
+
+mclex_t mclex_get_local_id(int d) {
+	return mclex_work_item_fn("get_local_id", d);
+}
+mclex_t mclex_get_global_size(int d) {
+	return mclex_work_item_fn("get_global_size", d);
+}
+mclex_t mclex_get_num_groups(int d) {
+	return mclex_work_item_fn("get_num_groups", d);
+}
+mclex_t mclex_get_global_id(int d) {
+	return mclex_work_item_fn("get_global_id", d);
+}
+mclex_t mclex_get_group_id(int d) {
+	return mclex_work_item_fn("get_group_id", d);
+}
+mclex_t mclex_get_local_size(int d) {
+	return mclex_work_item_fn("get_local_size", d);
+}
+mclex_t mclex_get_global_offset(int d) {
+	return mclex_work_item_fn("get_global_offset", d);
+}

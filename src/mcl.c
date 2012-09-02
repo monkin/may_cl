@@ -50,6 +50,19 @@ mclt_t mclt_pointer_to(mclt_t t) {
 	return t & 0x3F;
 }
 
+mclt_t mclt_unsigned(mclt_t t) {
+	if(mclt_is_integer(t) || mclt_is_vector_of_integer(t))
+		return t | MCLT_UNSIGNED;
+	else
+		err_throw(e_mclt_error);
+}
+mclt_t mclt_signed(mclt_t t) {
+	if(mclt_is_integer(t) || mclt_is_vector_of_integer(t))
+		return t | MCLT_UNSIGNED ^ MCLT_UNSIGNED;
+	else
+		err_throw(e_mclt_error);
+}
+
 size_t mclt_sizeof(mclt_t t) {
 	if(mclt_is_pointer(t) || mclt_is_image(t))
 		return sizeof(cl_mem);

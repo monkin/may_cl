@@ -142,5 +142,27 @@ mclex_t mclex_get_group_id(int d); /* size_t get_group_id (uint D) */
 mclex_t mclex_get_local_size(int d); /* size_t get_local_size (uint D) */
 mclex_t mclex_get_global_offset(int d); /* size_t get_global_offset (uint D) */
 
+mclex_t mclex_abs(mclex_t); /* U abs (T x) | x | */
+mclex_t mclex_abs_diff(mclex_t, mclex_t); /* U abs_diff (T x, T y) | x – y | without modulo overflow */
+
+mclex_t mclex_add_sat(mclex_t, mclex_t); /* T add_sat (T x, T y) x + y and saturates the result */
+mclex_t mclex_hadd(mclex_t, mclex_t); /* T hadd (T x, T y) (x + y) >> 1 without mod. overflow */
+mclex_t mclex_rhadd(mclex_t, mclex_t); /* T rhadd (T x, T y) (x + y + 1) >> 1 */
+mclex_t mclex_clz(mclex_t); /* T clz (T x) Number of leading 0-bits in x */
+mclex_t mclex_clamp(mclex_t, mclex_t, mclex_t); /* T clamp (T x, T min, T max) */
+
+/*T mad_hi (T a, T b, T c) mul_hi(a, b) + c
+T mad_sat (T a, T b, T c) a * b + c and saturates the result
+T max (T x, T y)
+T max (T x, S y)
+y if x < y, otherwise it returns x
+T min (T x, T y) y if y < x, otherwise it returns x
+T min (T x, S y) y if y < x, otherwise it returns x
+T mul_hi (T x, T y) high half of the product of x and y
+T rotate (T v, T i) result[indx] = v[indx] << i[indx]
+T sub_sat (T x, T y) x - y and saturates the result
+T mad24 (T a, T b, T c)
+T mul24 (T a, T b) */
+
 #endif /* MAY_CL_EX_H */
 

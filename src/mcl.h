@@ -74,6 +74,8 @@ typedef long mclt_t;
 #define mclt_is_scalar(t) mclt_is_numeric(t)
 #define mclt_is_unsigned(t) ((t)&MCLT_UNSIGNED)
 #define mclt_is_signed(t) (!((t)&MCLT_UNSIGNED))
+mclt_t mclt_unsigned(mclt_t);
+mclt_t mclt_signed(mclt_t);
 #define mclt_integer_size(t) (1<<((MCLT_I_SIZE & (t))-1))
 #define mclt_pointer_type(t) ((t) & (MCL_MEM_GLOBAL | MCL_MEM_LOCAL | MCL_MEM_PRIVATE | MCL_MEM_CONSTANT))
 size_t mclt_sizeof(mclt_t);

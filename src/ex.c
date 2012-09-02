@@ -655,3 +655,78 @@ mclex_t mclex_get_local_size(int d) {
 mclex_t mclex_get_global_offset(int d) {
 	return mclex_work_item_fn("get_global_offset", d);
 }
+
+mclex_t mclex_abs(mclex_t ex) {
+	mclex_t r = mclex_ex(mclt_unsigned(ex->type), 0);
+	sb_append_cs(r->source, "abs(");
+	sb_append_sb(ex->source);
+	sb_append_cs(r->source, ")");
+	return r;
+}
+mclex_t mclex_abs_diff(mclex_t a1, mclex_t a2) {
+	mclt_t at = mclt_promote(a1->type, a2->type);
+	mclex_t r = mclex_ex(mclt_unsigned(at), 0);
+	a1 = mclt_cast(at, a1);
+	a2 = mclt_cast(at, a2);
+	sb_append_cs(r->source, "abs_diff(");
+	sb_append_sb(a1->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(a2->source);
+	sb_append_cs(r->source, ")");
+	return r;
+}
+
+mclex_t mclex_fn_int_2(const char *nm, mclex_t a1, mclex_t a2) {
+	mclt_t rt = mclt_promote(a1->type, a2->type);
+	if(mclt_is_integer(rt) || mclt_is_vector_of_integer(rt)) {
+		mclex_t r = mclex_ex(rt, 0);
+		a1 = mclex_cast(rt, a1);
+		a2 = mclex_cast(rt, a2);
+		sb_append_cs(r->source, nm);
+		sb_append_cs(r->source, "(");
+		sb_append_sb(r->source, a1->source);
+		sb_append_cs(r->source, ", ");
+		sb_append_sb(r->source, a2->source);
+		sb_append_cs(r->source, ")");
+	} else
+		err_throw(e_mclex_error);
+}
+
+mclex_t mclex_add_sat(mclex_t a1, mclex_t a2) {
+	return mclex_fn_int_2("add_sat", a1, a2);
+}
+mclex_t mclex_hadd(mclex_t a1, mclex_t a2) {
+	return mclex_fn_int_2("hadd", a1, a2);
+}
+mclex_t mclex_rhadd(mclex_t a1, mclex_t a2) {
+	return mclex_fn_int_2("rhadd", a1, a2);
+}
+mclex_t mclex_clz(mclex_t a) {
+	if(mclt_is_integer(a->type) || mclt_is_vector_of_integer(a->type)) {
+		r = mclex_ex(a->type, 0);
+		sb_append_cs(r->source, "clz(");
+		sb_append_sb(r->source, a->source);
+		sb_append_cs(r->source, ")");
+	} else
+		err_throw(e_mclex_error);
+}
+mclex_t mclex_clamp(mclex_t a1, mclex_t a2, mclex_t a3) {
+	mclt_t rt, rt2;
+	mclt_t rt = mclt_promote(mclt_promote(a1->type, a2->type), a3->type);
+	if(mclt_is_vector(a1->type) && mclt_is_scalar(a2->type) && mclt_is_scalar(a3->type))
+		rt2 = mclt_vector_of(rt);
+	else
+		rt2 = rt;
+	r = mclex_ex(rt, 0);
+	a1 = mclex_cast(rt, a1);
+	a2 = mclex_cast(rt2, a2);
+	a3 = mclex_cast(rt2, a3);
+	sb_append_cs(r->source, "clamp(");
+	sb_append_sb(r->source, a1->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, a2->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, a3->source);
+	sb_append_cs(r->source, ")");
+	return r;
+}

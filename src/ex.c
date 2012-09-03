@@ -756,3 +756,43 @@ mclex_t mclex_mad_hi(mclex_t a1, mclex_t a2, mclex_t a3) {
 mclex_t mclex_mad_sat(mclex_t a1, mclex_t a2, mclex_t a3) {
 	return mclex_fn_int_3("mad_sat", a1, a2, a3);
 }
+
+mclex_t mclex_min_max(const char *nm, mclex_t a1, mclex_t a2) {
+	mclt_t rt = mclt_promote(a1->type, a2->type);
+	mclex_t a2t = rt;
+	mclex_t r = mclex_ex(rt, 0);
+	if(mclt_is_vector(rt) && mclt_is_scalar(a2->type))
+		a2t = mclt_vector_of(rt);
+	a1 = mclex_cast(rt, a1);
+	a2 = mclex_cast(a2t, a2);
+	sb_append_cs(r->source, nm);
+	sb_append_cs(r->source, "(");
+	sb_append_sb(r->source, a1->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, a2->source);
+	sb_append_cs(r->source, ")");
+}
+
+mclex_t mclex_min(mclex_t a1, mclex_t a2) {
+	return mclex_min_max("min", a1, a2);
+}
+mclex_t mclex_max(mclex_t a1, mclex_t a2) {
+	return mclex_min_max("max", a1, a2);
+}
+
+mclex_t mclex_mul_hi(mclex_t a1, mclex_t a2) {
+	return mclex_fn_int_2("mul_hi", a1, a2);
+}
+mclex_t mclex_rotate(mclex_t a1, mclex_t a2) {
+	return mclex_fn_int_2("rotate", a1, a2);
+}
+mclex_t mclex_sub_sat(mclex_t a1, mclex_t a2) {
+	return mclex_fn_int_2("sub_sat", a1, a2);
+}
+
+mclex_t mclex_mad24 (mclex_t a1, mclex_t a2, mclex_t a3) {
+	return mclex_fn_int_3("mad24", a1, a2, a3);
+}
+mclex_t mclex_mul24 (mclex_t a1, mclex_t a2) {
+	return mclex_fn_int_2("mul24", a1, a2);
+}

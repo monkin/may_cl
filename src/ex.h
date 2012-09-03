@@ -154,16 +154,16 @@ mclex_t mclex_clamp(mclex_t, mclex_t, mclex_t); /* T clamp (T x, T min, T max) *
 mclex_t mclex_mad_hi(mclex_t, mclex_t, mclex_t); /* T mad_hi (T a, T b, T c) mul_hi(a, b) + c */
 mclex_t mclex_mad_sat(mclex_t, mclex_t, mclex_t); /* T mad_sat (T a, T b, T c) a * b + c and saturates the result */
 
-/*T max (T x, T y)
-T max (T x, S y)
-y if x < y, otherwise it returns x
-T min (T x, T y) y if y < x, otherwise it returns x
-T min (T x, S y) y if y < x, otherwise it returns x
-T mul_hi (T x, T y) high half of the product of x and y
-T rotate (T v, T i) result[indx] = v[indx] << i[indx]
-T sub_sat (T x, T y) x - y and saturates the result
-T mad24 (T a, T b, T c)
-T mul24 (T a, T b) */
+mclex_t mclex_min(mclex_t, mclex_t);
+mclex_t mclex_max(mclex_t, mclex_t);
+
+mclex_t mclex_mul_hi(mclex_t a1, mclex_t a2); /* high half of the product of x and y */
+mclex_t mclex_rotate(mclex_t a1, mclex_t a2); /* result[indx] = v[indx] << i[indx] */
+mclex_t mclex_sub_sat(mclex_t a1, mclex_t a2); /* x - y and saturates the result */
+
+mclex_t mclex_mad24 (mclex_t a1, mclex_t a2, mclex_t a3);
+mclex_t mclex_mul24 (mclex_t a1, mclex_t a2);
+
 
 #endif /* MAY_CL_EX_H */
 

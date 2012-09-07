@@ -161,8 +161,63 @@ mclex_t mclex_mul_hi(mclex_t a1, mclex_t a2); /* high half of the product of x a
 mclex_t mclex_rotate(mclex_t a1, mclex_t a2); /* result[indx] = v[indx] << i[indx] */
 mclex_t mclex_sub_sat(mclex_t a1, mclex_t a2); /* x - y and saturates the result */
 
-mclex_t mclex_mad24 (mclex_t a1, mclex_t a2, mclex_t a3);
-mclex_t mclex_mul24 (mclex_t a1, mclex_t a2);
+mclex_t mclex_mad24(mclex_t a1, mclex_t a2, mclex_t a3);
+mclex_t mclex_mul24(mclex_t a1, mclex_t a2);
+
+mclex_t mclex_degrees(mclex_t);
+mclex_t mclex_radians(mclex_t);
+mclex_t mclex_sign(mclex_t);
+
+mclex_t mclex_mix(mclex_t, mclex_t, mclex_t);
+mclex_t mclex_step(mclex_t, mclex_t);
+mclex_t mclex_smoothstep(mclex_t, mclex_t, mclex_t);
+
+mclex_t mclex_acos(mclex_t);
+mclex_t mclex_acosh(mclex_t);
+mclex_t mclex_acospi(mclex_t);
+mclex_t mclex_asin(mclex_t);
+mclex_t mclex_asinh(mclex_t);
+mclex_t mclex_asinpi(mclex_t);
+mclex_t mclex_atan(mclex_t);
+mclex_t mclex_atan2(mclex_t, mclex_t);
+mclex_t mclex_atanh(mclex_t);
+mclex_t mclex_atanpi(mclex_t);
+mclex_t mclex_atan2pi(mclex_t, mclex_t);
+mclex_t mclex_cbrt(mclex_t);
+mclex_t mclex_ceil(mclex_t);
+mclex_t mclex_copysign(mclex_t, mclex_t);
+mclex_t mclex_cos(mclex_t);
+mclex_t mclex_cosh(mclex_t);
+mclex_t mclex_cospi(mclex_t);
+mclex_t mclex_erfc(mclex_t);
+mclex_t mclex_erf(mclex_t);
+mclex_t mclex_exp(mclex_t);
+mclex_t mclex_exp2(mclex_t);
+mclex_t mclex_exp10(mclex_t);
+mclex_t expm1(mclex_t);
+mclex_t fabs(mclex_t);
+mclex_t fdim(mclex_t, mclex_t);
+mclex_t floor(mclex_t);
+mclex_t fma(mclex_t, mclex_t, mclex_t);
+mclex_t fmax(mclex_t, mclex_t)
+mclex_t fmin(mclex_t, mclex_t)
+mclex_t fmod(mclex_t, mclex_t);
+mclex_t hypot(mclex_t, mclex_t);
+mclex_t lgamma(mclex_t)
+mclex_t log(mclex_t);
+mclex_t log2(mclex_t);
+mclex_t log10(mclex_t);
+mclex_t log1p(mclex_t);
+mclex_t logb(mclex_t);
+mclex_t mad(mclex_t, mclex_t, mclex_t);
+mclex_t maxmag(mclex_t, mclex_t);
+
+/*T fract (T, Q T *iptr);
+T frexp (T, Q intn *exp);
+T ldexp (T, intn n);
+T ldexp (T, int n);
+T lgamma_r (T, Q intn *signp);
+intn ilogb (T);*/
 
 
 #endif /* MAY_CL_EX_H */

@@ -796,3 +796,120 @@ mclex_t mclex_mad24 (mclex_t a1, mclex_t a2, mclex_t a3) {
 mclex_t mclex_mul24 (mclex_t a1, mclex_t a2) {
 	return mclex_fn_int_2("mul24", a1, a2);
 }
+
+#define mclex_unary_float_fn(nm) \
+mclex_t mclex_ ## nm (mclex_t a) { \
+	mclt_t rt = mclt_promote(a->type, MCLT_FLOAT); \
+	mclex_t r = mclex_ex(rt, 0); \
+	a = mclex_cast(rt, a); \
+	sb_append_cs(r->source, # nm "("); \
+	sb_append_sb(r->source, a->source); \
+	sb_append_cs(r->source, ")"); \
+	return r; \
+}
+
+#define mclex_binary_float_fn(nm)
+mclex_t mclex_ ## nm (mclex_t a1, mclex_t a2) {
+	mclt_t rt = mclt_promote(mclt_promote(a1->type, a2->type), MCLT_FLOAT);
+	mclex_t r = mclex_ex(rt, 0);
+	sb_append_cs(r->source, # nm "(");
+	sb_append_sb(r->source, a1->source); \
+	sb_append_cs(r->source, ", "); \
+	sb_append_sb(r->source, a2->source); \
+	sb_append_cs(r->source, ")"); \
+	return r;
+}
+
+mclex_unary_float_fn(radians);
+mclex_unary_float_fn(degrees);
+mclex_unary_float_fn(sign);
+
+mclex_t mclex_mix(mclex_t x1, mclex_t x2, mclex_t a) {
+	mclt_t rt = mclt_promote(mclt_promote(mclt_promote(x1->type, x2-type), a), MCLT_FLOAT);
+	mclex_t r = mclex_ex(rt, 0);
+	mclt_t a2t = rt;
+	if(mclt_is_scalar(x2->type) && mclt_is_scalar(a->type))
+		a2t = MCLT_FLOAT;
+	x1 = mclt_cast(rt, x1);
+	x2 = mclt_cast(a2t, x2);
+	a = mclt_cast(a2t, a);
+	sb_append_cs(r->source, "mix(");
+	sb_append_sb(r->source, x1->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, x2->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, a->source);
+	sb_append_cs(r->source, ")");
+	return r;
+}
+
+mclex_t mclex_step(mclex_t a1, mclex_t a2) {
+	mclt_t rt = mclt_promote(mclt_promote(a1->type, a2->type), MCLT_FLOAT);
+	mclex_t r = mclex_ex(rt, 0);
+	a1 = mclex_cast(mclt_is_scalar(a1->type) ? MCLT_FLOAT : rt, a1);
+	a2 = mclex_cast(rt, a2);
+	sb_append_cs(r->source, "step(");
+	sb_append_sb(r->source, a1->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, a2->source);
+	sb_append_cs(r->source, ")");
+	return r;
+}
+mclex_t mclex_smoothstep(mclex_t a1, mclex_t a2, mclex_t a3) {
+	mclt_t rt = mclt_promote(mclt_promote(a1->type, a2->type), MCLT_FLOAT);
+	mclt_t a2t = (mclt_is_scalar(a1) && mclt_is_scalar(a2)) ? MCLT_FLOAT : rt; 
+	mclex_t r = mclex_ex(rt, 0);
+	a1 = mclex_cast(a2t, a1);
+	a2 = mclex_cast(a2t, a2);
+	a3 = mclex_cast(rt, a3);
+	sb_append_cs(r->source, "step(");
+	sb_append_sb(r->source, a1->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, a2->source);
+	sb_append_cs(r->source, ", ");
+	sb_append_sb(r->source, a3->source);
+	sb_append_cs(r->source, ")");
+	return r;
+}
+
+mclex_unary_float_fn(mclex_acos);
+mclex_unary_float_fn(mclex_acosh);
+mclex_unary_float_fn(mclex_acospi);
+mclex_unary_float_fn(mclex_asin);
+mclex_unary_float_fn(mclex_asinh);
+mclex_unary_float_fn(mclex_asinpi);
+mclex_unary_float_fn(mclex_atan);
+mclex_binary_float_fn(mclex_atan2);
+mclex_unary_float_fn(mclex_atanh);
+mclex_unary_float_fn(mclex_atanpi);
+mclex_binary_float_fn(mclex_atan2pi);
+mclex_unary_float_fn(mclex_cbrt);
+mclex_unary_float_fn(mclex_ceil);
+mclex_binary_float_fn(mclex_copysign);
+mclex_unary_float_fn(mclex_cos);
+mclex_unary_float_fn(mclex_cosh);
+mclex_unary_float_fn(mclex_cospi);
+mclex_unary_float_fn(mclex_erfc);
+mclex_unary_float_fn(mclex_erf);
+mclex_unary_float_fn(mclex_exp);
+mclex_unary_float_fn(mclex_exp2);
+mclex_unary_float_fn(mclex_exp10);
+mclex_unary_float_fn(expm1);
+mclex_unary_float_fn(fabs);
+mclex_binary_float_fn(fdim);
+mclex_unary_float_fn(floor);
+mclex_binary_float_fn(fmod);
+mclex_binary_float_fn(hypot);
+mclex_unary_float_fn(lgamma);
+mclex_unary_float_fn(log);
+mclex_unary_float_fn(log2);
+mclex_unary_float_fn(log10);
+mclex_unary_float_fn(log1p);
+mclex_unary_float_fn(logb);
+mclex_binary_float_fn(maxmag);
+
+mclex_t mad(mclex_t, mclex_t, mclex_t);
+mclex_t fma(mclex_t, mclex_t, mclex_t);
+mclex_t fmax(mclex_t, mclex_t)
+mclex_t fmin(mclex_t, mclex_t)
+

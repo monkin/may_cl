@@ -872,28 +872,28 @@ mclex_t mclex_smoothstep(mclex_t a1, mclex_t a2, mclex_t a3) {
 	return r;
 }
 
-mclex_unary_float_fn(mclex_acos);
-mclex_unary_float_fn(mclex_acosh);
-mclex_unary_float_fn(mclex_acospi);
-mclex_unary_float_fn(mclex_asin);
-mclex_unary_float_fn(mclex_asinh);
-mclex_unary_float_fn(mclex_asinpi);
-mclex_unary_float_fn(mclex_atan);
-mclex_binary_float_fn(mclex_atan2);
-mclex_unary_float_fn(mclex_atanh);
-mclex_unary_float_fn(mclex_atanpi);
-mclex_binary_float_fn(mclex_atan2pi);
-mclex_unary_float_fn(mclex_cbrt);
-mclex_unary_float_fn(mclex_ceil);
-mclex_binary_float_fn(mclex_copysign);
-mclex_unary_float_fn(mclex_cos);
-mclex_unary_float_fn(mclex_cosh);
-mclex_unary_float_fn(mclex_cospi);
-mclex_unary_float_fn(mclex_erfc);
-mclex_unary_float_fn(mclex_erf);
-mclex_unary_float_fn(mclex_exp);
-mclex_unary_float_fn(mclex_exp2);
-mclex_unary_float_fn(mclex_exp10);
+mclex_unary_float_fn(acos);
+mclex_unary_float_fn(acosh);
+mclex_unary_float_fn(acospi);
+mclex_unary_float_fn(asin);
+mclex_unary_float_fn(asinh);
+mclex_unary_float_fn(asinpi);
+mclex_unary_float_fn(atan);
+mclex_binary_float_fn(atan2);
+mclex_unary_float_fn(atanh);
+mclex_unary_float_fn(atanpi);
+mclex_binary_float_fn(atan2pi);
+mclex_unary_float_fn(cbrt);
+mclex_unary_float_fn(ceil);
+mclex_binary_float_fn(copysign);
+mclex_unary_float_fn(cos);
+mclex_unary_float_fn(cosh);
+mclex_unary_float_fn(cospi);
+mclex_unary_float_fn(erfc);
+mclex_unary_float_fn(erf);
+mclex_unary_float_fn(exp);
+mclex_unary_float_fn(exp2);
+mclex_unary_float_fn(exp10);
 mclex_unary_float_fn(expm1);
 mclex_unary_float_fn(fabs);
 mclex_binary_float_fn(fdim);
@@ -908,8 +908,13 @@ mclex_unary_float_fn(log1p);
 mclex_unary_float_fn(logb);
 mclex_binary_float_fn(maxmag);
 
-mclex_t mad(mclex_t, mclex_t, mclex_t);
-mclex_t fma(mclex_t, mclex_t, mclex_t);
-mclex_t fmax(mclex_t, mclex_t)
-mclex_t fmin(mclex_t, mclex_t)
+mclex_t mclex_fma(mclex_t, mclex_t, mclex_t);
+mclex_t mclex_fmax(mclex_t, mclex_t);
+mclex_t mclex_fmin(mclex_t, mclex_t);
+mclex_t mclex_fract(mclex_t, mclex_t);
+mclex_t mclex_frexp(mclex_t, mclex_t);
+mclex_t mclex_ldexp(mclex_t, mclex_t);
+mclex_t mclex_ldexp(mclex_t, mclex_t);
+mclex_t mclex_lgamma_r(mclex_t, mclex_t);
+mclex_t mclex_ilogb(mclex_t);
 

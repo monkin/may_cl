@@ -194,30 +194,30 @@ mclex_t mclex_erf(mclex_t);
 mclex_t mclex_exp(mclex_t);
 mclex_t mclex_exp2(mclex_t);
 mclex_t mclex_exp10(mclex_t);
-mclex_t expm1(mclex_t);
-mclex_t fabs(mclex_t);
-mclex_t fdim(mclex_t, mclex_t);
-mclex_t floor(mclex_t);
-mclex_t fma(mclex_t, mclex_t, mclex_t);
-mclex_t fmax(mclex_t, mclex_t)
-mclex_t fmin(mclex_t, mclex_t)
-mclex_t fmod(mclex_t, mclex_t);
-mclex_t hypot(mclex_t, mclex_t);
-mclex_t lgamma(mclex_t)
-mclex_t log(mclex_t);
-mclex_t log2(mclex_t);
-mclex_t log10(mclex_t);
-mclex_t log1p(mclex_t);
-mclex_t logb(mclex_t);
-mclex_t mad(mclex_t, mclex_t, mclex_t);
-mclex_t maxmag(mclex_t, mclex_t);
+mclex_t mclex_expm1(mclex_t);
+mclex_t mclex_fabs(mclex_t);
+mclex_t mclex_fdim(mclex_t, mclex_t);
+mclex_t mclex_floor(mclex_t);
+mclex_t mclex_fma(mclex_t, mclex_t, mclex_t);
+mclex_t mclex_fmax(mclex_t, mclex_t)
+mclex_t mclex_fmin(mclex_t, mclex_t)
+mclex_t mclex_fmod(mclex_t, mclex_t);
+mclex_t mclex_hypot(mclex_t, mclex_t);
+mclex_t mclex_lgamma(mclex_t)
+mclex_t mclex_log(mclex_t);
+mclex_t mclex_log2(mclex_t);
+mclex_t mclex_log10(mclex_t);
+mclex_t mclex_log1p(mclex_t);
+mclex_t mclex_logb(mclex_t);
+mclex_t mclex_mad(mclex_t, mclex_t, mclex_t);
+mclex_t mclex_maxmag(mclex_t, mclex_t);
 
-/*T fract (T, Q T *iptr);
-T frexp (T, Q intn *exp);
-T ldexp (T, intn n);
-T ldexp (T, int n);
-T lgamma_r (T, Q intn *signp);
-intn ilogb (T);*/
+mclex_t mclex_fract(mclex_t, mclex_t);
+mclex_t mclex_frexp(mclex_t, mclex_t);
+mclex_t mclex_ldexp(mclex_t, mclex_t);
+mclex_t mclex_ldexp(mclex_t, mclex_t);
+mclex_t mclex_lgamma_r(mclex_t, mclex_t);
+mclex_t mclex_ilogb(mclex_t);
 
 
 #endif /* MAY_CL_EX_H */

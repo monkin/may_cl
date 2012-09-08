@@ -50,6 +50,10 @@ void mclex_program_reset(); /* Remove all current program data and stop building
 mclex_program_t mclex_program_end();
 mclex_program_t mclex_program_delete(mclex_program_t);
 
+/* void *mclex_global_flag(str_t); */
+#define mclex_global_flag(f) (map_get(mclex_program->global_flags, (f)))
+#define mclex_global_flag_set(f, v) (map_set(mclex_program->global_flags, (f), (v)))
+
 typedef struct mclex_ss {
 	mclt_t type;
 	sb_t source;
@@ -211,14 +215,22 @@ mclex_t mclex_log1p(mclex_t);
 mclex_t mclex_logb(mclex_t);
 mclex_t mclex_mad(mclex_t, mclex_t, mclex_t);
 mclex_t mclex_maxmag(mclex_t, mclex_t);
+mclex_t mclex_log(mclex_t);
+mclex_t mclex_log2(mclex_t);
+mclex_t mclex_log10(mclex_t);
+mclex_t mclex_log1p(mclex_t);
+mclex_t mclex_logb(mclex_t);
 
+mclex_t mclex_sincos(mclex_t, mclex_t);
+
+/*
 mclex_t mclex_fract(mclex_t, mclex_t);
 mclex_t mclex_frexp(mclex_t, mclex_t);
 mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_lgamma_r(mclex_t, mclex_t);
 mclex_t mclex_ilogb(mclex_t);
-
+*/
 
 #endif /* MAY_CL_EX_H */
 

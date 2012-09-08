@@ -252,10 +252,10 @@ mclex_t mclex_var(mclex_t ex) {
 }
 
 mclex_t mclex_global_var(str_t name, mclex_t ex) {
-	mclex_t r = (mclex_t) map_get(mclex_program->global_flags, name);
+	mclex_t r = mclex_global_flag(name);
 	if(!r) {
 		r = (mclex_t) mclex_var_i(ex, mclex_global_source(), 0);
-		map_set(mclex_program->global_flags, name, r);
+		mclex_global_flag_set(name, r);
 	}
 	return r;
 }
@@ -284,10 +284,10 @@ mclex_t mclex_const(mclex_t ex) {
 }
 
 mclex_t mclex_global_const(str_t name, mclex_t ex) {
-	mclex_t r = (mclex_t) map_get(mclex_program->global_flags, name);
+	mclex_t r = mclex_global_flag(name);
 	if(!r) {
 		r = (mclex_t) mclex_const_i(ex, mclex_global_source());
-		map_set(mclex_program->global_flags, name, r);
+		mclex_global_flag_set(name, r);
 	}
 	return r;
 }
@@ -907,8 +907,28 @@ mclex_unary_float_fn(log10);
 mclex_unary_float_fn(log1p);
 mclex_unary_float_fn(logb);
 mclex_binary_float_fn(maxmag);
+mclex_unary_float_fn(log);
+mclex_unary_float_fn(log2);
+mclex_unary_float_fn(log10);
+mclex_unary_float_fn(log1p);
+mclex_unary_float_fn(logb);
 
-mclex_t mclex_fma(mclex_t, mclex_t, mclex_t);
+mclex_t mclex_sincos(mclex_t a, mclex_t p) {
+	mclt_t rt = mclt_pointer_to(p->type);
+	if(mclt_is_float(rt) || mclt_is_vector_of_float(rt)) {
+		mclex_t r = mclex_ex(rt, 0);
+		a = mclex_cast(rt, a);
+		sb_append(r->source, "sincos(");
+		sb_append_sb(r->source, a->source);
+		sb_append(r->source, ", ");
+		sb_append_sb(r->source, p->source);
+		sb_append(r->source, ")");
+		return r;
+	} else
+		err_throw(e_mclex_error);
+}
+
+/*mclex_t mclex_fma(mclex_t, mclex_t, mclex_t);
 mclex_t mclex_fmax(mclex_t, mclex_t);
 mclex_t mclex_fmin(mclex_t, mclex_t);
 mclex_t mclex_fract(mclex_t, mclex_t);
@@ -917,4 +937,10 @@ mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_lgamma_r(mclex_t, mclex_t);
 mclex_t mclex_ilogb(mclex_t);
+mclex_t mclex_fract(mclex_t, mclex_t);
+mclex_t mclex_frexp(mclex_t, mclex_t);
+mclex_t mclex_ldexp(mclex_t, mclex_t);
+mclex_t mclex_ldexp(mclex_t, mclex_t);
+mclex_t mclex_lgamma_r(mclex_t, mclex_t);
+mclex_t mclex_ilogb(mclex_t);*/
 

@@ -17,6 +17,11 @@ mclex_t mclex_ex(mclt_t t, long mem_type) {
 	return ex;
 }
 
+void *mclex_global_set(str_t s, void *d) {
+	map_set(mclex_program->global_flags, s, d);
+	return d;
+}
+
 /* Program */
 
 void mclex_program_begin() {
@@ -251,13 +256,8 @@ mclex_t mclex_var(mclex_t ex) {
 	return mclex_var_i(ex, mclex_block_source(), MCL_MEM_PRIVATE);
 }
 
-mclex_t mclex_global_var(str_t name, mclex_t ex) {
-	mclex_t r = mclex_global_flag(name);
-	if(!r) {
-		r = (mclex_t) mclex_var_i(ex, mclex_global_source(), 0);
-		mclex_global_flag_set(name, r);
-	}
-	return r;
+mclex_t mclex_global_var(mclex_t ex) {
+	return mclex_var_i(ex, mclex_global_source(), 0);
 }
 
 static mclex_t mclex_const_i(mclex_t ex, sb_t sb) {	
@@ -283,13 +283,8 @@ mclex_t mclex_const(mclex_t ex) {
 	return mclex_const_i(ex, mclex_block_source());
 }
 
-mclex_t mclex_global_const(str_t name, mclex_t ex) {
-	mclex_t r = mclex_global_flag(name);
-	if(!r) {
-		r = (mclex_t) mclex_const_i(ex, mclex_global_source());
-		mclex_global_flag_set(name, r);
-	}
-	return r;
+mclex_t mclex_global_const(mclex_t ex) {
+	return mclex_const_i(ex, mclex_global_source());
 }
 
 static void mclex_literal_bytes(sb_t sb, const char *data, size_t sz) {
@@ -958,4 +953,8 @@ mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_lgamma_r(mclex_t, mclex_t);
 mclex_t mclex_ilogb(mclex_t);*/
+
+mclt_t mclex_random(int n) {
+	
+}
 

@@ -51,8 +51,8 @@ mclex_program_t mclex_program_end();
 mclex_program_t mclex_program_delete(mclex_program_t);
 
 /* void *mclex_global_flag(str_t); */
-#define mclex_global_flag(f) (map_get(mclex_program->global_flags, (f)))
-#define mclex_global_flag_set(f, v) (map_set(mclex_program->global_flags, (f), (v)))
+#define mclex_global_get(f) (map_get(mclex_program->global_flags, (f)))
+void *mclex_global_set(str_t, void *);
 
 typedef struct mclex_ss {
 	mclt_t type;
@@ -94,7 +94,7 @@ mclex_t mclex_global_const(str_t name, mclex_t);
 mclex_t mclex_literal(mclt_t tp, const void *val);
 
 mclex_t mclex_array(mclt_t tp, size_t sz, const void *val);
-mclex_t mclex_global_array(mclt_t tp, size_t sz, const void *val);
+mclex_t mclex_global_array(str_t name, mclt_t tp, size_t sz, const void *val);
 
 mclex_t mclex_neg(mclex_t);
 mclex_t mclex_add(mclex_t, mclex_t);
@@ -233,6 +233,8 @@ mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_lgamma_r(mclex_t, mclex_t);
 mclex_t mclex_ilogb(mclex_t);
 */
+
+mclt_t mclex_random(int n);
 
 #endif /* MAY_CL_EX_H */
 

@@ -339,21 +339,36 @@ mclex_t mclex_literal(mclt_t tp, const void *val) {
 	return r;
 }
 
-mclex_t mclex_array(mclt_t tp, size_t sz, const void *val) {
+static mclex_t mclex_array_i(sb_t sb, mclt_t tp, size_t sz, const void *val) {
 	mclex_t r = mclex_ex(tp, 0);
+	str_t name = mclex_var_name();
+	sb_append(r->source, name);
 	if(mclt_is_pointer(tp)) {
-		size_t i;
 		const pt = mclt_pointer_to(tp);
-		sb_append_cs(r->source, "{");
+		sb_append(sb, mclt_name(mclt_pointer_type(tp)));
+		sb_append_cs(sb, " ");
+		sb_append(sb, mclt_name(pt));
+		sb_append_cs(sb, " ");
+		sb_append(sb, name);
+		sb_append_cs(sb, "[] = {");
+		size_t i;
 		for(i=0; i<sz; i++) {
 			if(i!=0)
-				sb_append_cs(r->source, ", ");
-			mclex_literal_i(r->source, pt, ((const char *) val) + mclt_sizeof(pt)*i);
+				sb_append_cs(sb, ", ");
+			mclex_literal_i(sb, pt, ((const char *) val) + mclt_sizeof(pt)*i);
 		}
-		sb_append_cs(r->source, "}");
+		sb_append_cs(sb, "};\n");
 	} else
 		err_throw(e_mclex_error);
 	return r;
+}
+
+mclex_t mclex_array(mclt_t tp, size_t sz, const void *val) {
+	return mclex_array_i(mclex_local_source(), tp, sz, val);
+}
+
+mclex_t mclex_global_array(mclt_t tp, size_t sz, const void *val) {
+	return mclex_array_i(mclex_global_source(), tp, sz, val);
 }
 
 /* operators */

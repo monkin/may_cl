@@ -173,6 +173,12 @@ void mclt_init() {
 			/* Init types */
 			heap_t h = type_heap = heap_create(0);
 			type_names = map_create(type_heap);
+			
+			insert_name(MCLT_P_GLOBAL, "global");
+			insert_name(MCLT_P_LOCAL, "local");
+			insert_name(MCLT_P_PRIVATE, "private");
+			insert_name(MCLT_P_CONSTANT, "constant");
+			
 			insert_name(MCLT_VOID, "void");
 			insert_name_p(MCLT_VOID, "void");
 			insert_name_v(MCLT_FLOAT, "float");

@@ -92,7 +92,9 @@ mclex_t mclex_global_var(str_t name, mclex_t);
 mclex_t mclex_global_const(str_t name, mclex_t);
 
 mclex_t mclex_literal(mclt_t tp, const void *val);
+
 mclex_t mclex_array(mclt_t tp, size_t sz, const void *val);
+mclex_t mclex_global_array(mclt_t tp, size_t sz, const void *val);
 
 mclex_t mclex_neg(mclex_t);
 mclex_t mclex_add(mclex_t, mclex_t);

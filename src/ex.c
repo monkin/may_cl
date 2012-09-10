@@ -334,6 +334,21 @@ mclex_t mclex_literal(mclt_t tp, const void *val) {
 	return r;
 }
 
+#define typed_literal(t, clt) \
+mclex_t mclex_ ## t (cl_ ## t v) { \
+	return mclex_literal(clt, &v); \
+}
+
+typed_literal(char, MCLT_CHAR);
+typed_literal(uchar, MCLT_UCHAR);
+typed_literal(short, MCLT_SHORT);
+typed_literal(ushort, MCLT_USHORT);
+typed_literal(int, MCLT_INT);
+typed_literal(uint, MCLT_UINT);
+typed_literal(long, MCLT_LONG);
+typed_literal(ulong, MCLT_ULONG);
+typed_literal(float, MCLT_FLOAT);
+
 static mclex_t mclex_array_i(sb_t sb, mclt_t tp, size_t sz, const void *val) {
 	mclex_t r = mclex_ex(tp, 0);
 	str_t name = mclex_var_name();
@@ -621,6 +636,26 @@ mclex_t mclex_v_index(mclex_t ex, str_t s) {
 	else
 		sb_append_cs(r->source, ".s");
 	sb_append(r->source, s);
+	return r;
+}
+
+mclex_t mclex_v_first_n(mclex_t ex, int n) {
+	static const char *indexes[] = {".s0", ".s01", ".s012", ".s0123", ".s01234567"};
+	int av_sz = mclt_vector_size(ex->type);
+	if(av_sz==n)
+		return ex;
+	if(av_sz<n)
+		err_throw(e_mclex_error);
+	
+	const char *iv = 0;
+	if((n<=4 && n>=1) || n==8)
+		iv = indexes[n==8 ? 4 : n-1];
+	else
+		err_throw(e_mclex_error);
+	
+	mclex_t r = mclex_ex(mclt_vector(mclt_vector_of(ex->type), n), ex->mem_type);
+	sb_append_sb(r->source, ex->source);
+	sb_append_cs(r->source, iv);
 	return r;
 }
 
@@ -955,6 +990,25 @@ mclex_t mclex_lgamma_r(mclex_t, mclex_t);
 mclex_t mclex_ilogb(mclex_t);*/
 
 mclt_t mclex_random(int n) {
+	mclex_t seed = mclex_global_get("@random_seed");
+	mclex_t initialized = mclex_global_get("@random_initialized");
+	if(!seed) {
+		cl_uint16 seed_vector = {74986, 4751, 76951, 7135, 87963, 120, 8740, 84869, 48118, 72094, 1566, 1961, 73537, 58459, 16800, 87426};
+		initialized = mclex_global_var(mclex_null(MCLT_UINT));
+		seed = mclex_global_var(mclex_literal(MCLT_FLOAT_16, &seed_vector));
+	}
 	
+	// Initialization
+	mclex_if(mclex_not(initialized));
+		mclex_t one_ex = mclex_uint(1);
+		mclex_set(seed, mclex_mul(seed, mclex_add(mclex_get_global_id(0), one_ex)));
+		mclex_set(initialized, one_ex);
+	mclex_end();
+	
+	// Compute
+	mclex_t sv = mclex_v_first_n(seed, n); 
+	mclex_set(sv, mclex_add(mclex_mul(sv, mclex_uint(69069)), mclex_uint(5)));
+	
+	return mclex_var(mclex_div(mclex_cast(mclt_vector(MCLT_FLOAT, n), sv), mclex_float(4294967295.0f)));
 }
 

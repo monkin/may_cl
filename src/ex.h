@@ -88,10 +88,20 @@ mclex_t mclex_null(mclt_t);
 mclex_t mclex_var(mclex_t);
 mclex_t mclex_const(mclex_t);
 
-mclex_t mclex_global_var(str_t name, mclex_t);
-mclex_t mclex_global_const(str_t name, mclex_t);
+mclex_t mclex_global_var(mclex_t);
+mclex_t mclex_global_const(mclex_t);
 
 mclex_t mclex_literal(mclt_t tp, const void *val);
+mclex_t mclex_char(cl_char);
+mclex_t mclex_uchar(cl_uchar);
+mclex_t mclex_short(cl_short);
+mclex_t mclex_ushort(cl_ushort);
+mclex_t mclex_int(cl_int);
+mclex_t mclex_uint(cl_uint);
+mclex_t mclex_long(cl_long);
+mclex_t mclex_ulong(cl_ulong);
+mclex_t mclex_float(cl_float);
+
 
 mclex_t mclex_array(mclt_t tp, size_t sz, const void *val);
 mclex_t mclex_global_array(str_t name, mclt_t tp, size_t sz, const void *val);
@@ -138,6 +148,7 @@ void mclex_v(mclex_t);
 mclex_t mclex_v_end();
 mclex_t mclex_v_index(mclex_t, str_t);
 #define mclex_v_index_cs(ex, s) mclex_v_index((ex), str_form_cs(mclex_heap(), (s)))
+mclex_t mclex_v_first_n(mclex_t, int n);
 
 mclex_t mclex_get_work_dim(); /* uint get_work_dim() */
 mclex_t mclex_get_local_id(int d); /* size_t get_local_id(uint D) */

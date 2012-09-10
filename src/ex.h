@@ -83,6 +83,7 @@ void mclex_while(mclex_t); /* block */
 mclex_t mclex_for(mclex_t, mclex_t); /* block */
 
 mclex_t mclex_cast(mclt_t, mclex_t);
+mclex_t mclex_as(mclt_t, mclex_t);
 
 mclex_t mclex_null(mclt_t);
 mclex_t mclex_var(mclex_t);

@@ -131,18 +131,30 @@ mclex_t mclex_cast(mclt_t t, mclex_t ex) {
 		mclex_t r = mclex_ex(t, 0);
 		if(mclt_is_vector(t) || mclt_is_scalar(t)) {
 			sb_append_cs(r->source, "convert_");
-			sb_append(r->source, mclt_name(cd->cast_to));
+			sb_append(r->source, mclt_name(t));
 			sb_append_cs(r->source, "(");
-			sb_append_sb(r->source, s);
+			sb_append_sb(r->source, ex->source);
 			sb_append_cs(r->source, ")");
 		} else {
 			sb_append_cs(r->source, "((");
-			sb_append(r->source, mclt_name(cd->cast_to));
+			sb_append(r->source, mclt_name(t));
 			sb_append_cs(r->source, ") (");
 			sb_append_sb(r->source, ex->source);
 			sb_append_cs(r->source, "))");
 		}
 		return r;
+	} else
+		err_throw(e_mclex_error);
+}
+
+mclex_t mclex_as(mclt_t t, mclex_t ex) {
+	if(mclt_sizeof(t)==mclt_sizeof(ex->type)) {
+		mclex_t r = mclex_ex(t, 0);
+		sb_append_cs(r->source, "as_");
+		sb_append(r->source, mclt_name(cd->cast_to));
+		sb_append_cs(r->source, "(");
+		sb_append_sb(r->source, s);
+		sb_append_cs(r->source, ")");
 	} else
 		err_throw(e_mclex_error);
 }

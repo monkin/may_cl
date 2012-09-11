@@ -1010,17 +1010,18 @@ mclt_t mclex_random(int n) {
 		seed = mclex_global_var(mclex_literal(MCLT_FLOAT_16, &seed_vector));
 	}
 	
-	// Initialization
+	/* Initialization */
 	mclex_if(mclex_not(initialized));
 		mclex_t one_ex = mclex_uint(1);
 		mclex_set(seed, mclex_mul(seed, mclex_add(mclex_get_global_id(0), one_ex)));
 		mclex_set(initialized, one_ex);
 	mclex_end();
 	
-	// Compute
+	/* Compute */
 	mclex_t sv = mclex_v_first_n(seed, n); 
 	mclex_set(sv, mclex_add(mclex_mul(sv, mclex_uint(69069)), mclex_uint(5)));
 	
-	return mclex_var(mclex_div(mclex_cast(mclt_vector(MCLT_FLOAT, n), sv), mclex_float(4294967295.0f)));
+	/* http://algolist.manual.ru/maths/generator/fastest.php */
+	return mclex_as(mclt_vector(MCLT_FLOAT, n), mclex_bor(mclex_band(mclex_as(mclt_vector(MCLT_UINT, n), sv), mclex_uint(0xffff007f)), mclt_uint(0x00004080))); 
 }
 

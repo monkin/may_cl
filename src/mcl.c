@@ -12,6 +12,8 @@ ERR_DEFINE(e_mclt_size_undefined, "Can't determine type size", e_mclt_error);
 mclt_t mclt_vector(mclt_t t, int vector_size) {
 	if(mclt_is_numeric(t)) {
 		switch(vector_size) {
+			case 1:
+				return t;
 			case 2:
 			case 3:
 			case 4:

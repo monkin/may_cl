@@ -234,6 +234,8 @@ mclex_t mclex_log2(mclex_t);
 mclex_t mclex_log10(mclex_t);
 mclex_t mclex_log1p(mclex_t);
 mclex_t mclex_logb(mclex_t);
+mclex_t mclex_rsqrt(mclex_t);
+mclex_t mclex_sqrt(mclex_t);
 
 mclex_t mclex_sincos(mclex_t, mclex_t);
 
@@ -246,7 +248,21 @@ mclex_t mclex_lgamma_r(mclex_t, mclex_t);
 mclex_t mclex_ilogb(mclex_t);
 */
 
-mclt_t mclex_random(int n);
+mclex_t mclex_maxfloat();
+mclex_t mclex_infinity();
+mclex_t mclex_nan();
+mclex_t mclex_e();
+mclex_t mclex_pi();
+mclex_t mclex_2pi();
+mclex_t mclex_pi_2();
+mclex_t mclex_pi_4();
+mclex_t mclex_1_pi();
+mclex_t mclex_2_pi();
+mclex_t mclex_sqrt2();
+mclex_t mclex_1_sqrt2();
+
+mclex_t mclex_random(int n);
+mclex_t mclex_random_gaussian(mclex_t rnd, mclex_t deviation);
 
 #endif /* MAY_CL_EX_H */
 

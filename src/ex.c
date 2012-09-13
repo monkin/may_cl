@@ -969,6 +969,15 @@ mclex_unary_float_fn(log2);
 mclex_unary_float_fn(log10);
 mclex_unary_float_fn(log1p);
 mclex_unary_float_fn(logb);
+mclex_unary_float_fn(rsqrt);
+mclex_unary_float_fn(sqrt);
+
+#define float_const(fn, src) \
+mclex_t mclex_ ## fn() { \
+	mclex_t r = mclex_ex(MCLT_FLOAT, 0); \
+	sb_append_cs(r->source, src); \
+	return r; \
+}
 
 mclex_t mclex_sincos(mclex_t a, mclex_t p) {
 	mclt_t rt = mclt_pointer_to(p->type);
@@ -989,7 +998,7 @@ mclex_t mclex_sincos(mclex_t a, mclex_t p) {
 mclex_t mclex_fmax(mclex_t, mclex_t);
 mclex_t mclex_fmin(mclex_t, mclex_t);
 mclex_t mclex_fract(mclex_t, mclex_t);
-mclex_t mclex_frexp(mclex_t, mclex_t);
+mclex_t mclex_frexp(mclex_t, mclex_ts);
 mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_lgamma_r(mclex_t, mclex_t);
@@ -1001,7 +1010,25 @@ mclex_t mclex_ldexp(mclex_t, mclex_t);
 mclex_t mclex_lgamma_r(mclex_t, mclex_t);
 mclex_t mclex_ilogb(mclex_t);*/
 
-mclt_t mclex_random(int n) {
+/* Constants */
+
+float_const(maxfloat, "MAXFLOAT");
+float_const(infinity, "INFINITY");
+float_const(nan, "NAN");
+float_const(e, "M_E_F");
+float_const(pi, "M_PI_F");
+float_const(2pi, "(2*M_PI_F)");
+float_const(pi_2, "M_PI_2_F");
+float_const(pi_4, "M_PI_4_F");
+float_const(1_pi, "M_1_PI_F");
+float_const(2_pi, "M_2_PI_F");
+float_const(sqrt2, "M_SQRT2_F");
+float_const(1_sqrt2, "M_SQRT1_2_F");
+
+/* Random */
+
+/* seed = seed * 69069 + 5 */
+mclex_t mclex_random(int n) {
 	mclex_t seed = mclex_global_get("@random_seed");
 	mclex_t initialized = mclex_global_get("@random_initialized");
 	if(!seed) {
@@ -1023,5 +1050,9 @@ mclt_t mclex_random(int n) {
 	
 	/* http://algolist.manual.ru/maths/generator/fastest.php */
 	return mclex_as(mclt_vector(MCLT_FLOAT, n), mclex_bor(mclex_band(mclex_as(mclt_vector(MCLT_UINT, n), sv), mclex_uint(0xffff007f)), mclt_uint(0x00004080))); 
+}
+
+mclex_t mclex_random_gaussian(mclex_t rnd, mclex_t deviation) {
+	
 }
 
